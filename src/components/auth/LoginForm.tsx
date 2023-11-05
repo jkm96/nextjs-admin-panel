@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import React, {useEffect, useState} from "react";
 import {validateLoginFormInputErrors} from "@/helpers/validationHelpers";
@@ -15,15 +14,9 @@ const initialFormState: LoginUserRequest = {
     email: "", password: ""
 };
 
-export default function SignInForm() {
-    const {user,storeAuthToken} = useAuth();
+export default function LoginForm() {
+    const {storeAuthToken} = useAuth();
     const router = useRouter()
-    useEffect(() => {
-        if (user){
-            router.push("/profile")
-        }
-    }, [user, router]);
-
     const [isVisible, setIsVisible] = useState(false);
     const [backendError, setBackendError] = useState("");
     const [inputErrors, setInputErrors] = useState({
@@ -61,7 +54,7 @@ export default function SignInForm() {
             setLoginFormData(initialFormState)
             let responseData: TokenResponse = response.data;
             storeAuthToken(responseData);
-            router.push("/profile")
+            router.push("/dashboard")
         } else {
             setBackendError(response.message ?? "Unknown error occurred");
         }
@@ -81,6 +74,7 @@ export default function SignInForm() {
                         <form onSubmit={handleLoginSubmit}>
                             <div className="flex flex-wrap md:flex-nowrap gap-4 m-2">
                                 <Input type="text"
+                                       onChange={handleChange}
                                        value={loginFormData.email}
                                        label="Email"
                                        name="email"
@@ -134,7 +128,7 @@ export default function SignInForm() {
                             <div className="mt-6 text-center">
                                 <p>
                                     Don’t have any account?{" "}
-                                    <Link href="/auth/signup" className="text-primary">
+                                    <Link href="/auth/register" className="text-primary">
                                         Sign Up
                                     </Link>
                                 </p>

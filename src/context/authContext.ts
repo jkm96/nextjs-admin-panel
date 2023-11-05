@@ -4,6 +4,7 @@ import {TokenResponse} from "@/interfaces/token";
 
 const AuthContextDefaultValue = {
     user: null as User | null,
+    loading:true,
     storeAuthToken: (tokenData: TokenResponse) => {},
     clearAuthToken: () => {}
 };

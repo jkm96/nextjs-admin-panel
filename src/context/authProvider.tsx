@@ -12,6 +12,7 @@ type AuthContextProps = {
 
 export function AuthProvider({children}: AuthContextProps) {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true); // Add the loading state
 
     const storeAuthToken = async (tokenData: TokenResponse) => {
         // Store the authentication token in browser cookies or local storage
@@ -44,7 +45,10 @@ export function AuthProvider({children}: AuthContextProps) {
                 const { accessToken } = tokenResponse;
                 const userData = getUserDetails(accessToken);
                 setUser(userData);
+            }else{
+                setUser(null)
             }
+            setLoading(false)
         }
 
         fetchAccessToken().catch(error => {
@@ -53,7 +57,7 @@ export function AuthProvider({children}: AuthContextProps) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{user, storeAuthToken, clearAuthToken}}>
+        <AuthContext.Provider value={{user, loading,storeAuthToken, clearAuthToken}}>
             {children}
         </AuthContext.Provider>
     );

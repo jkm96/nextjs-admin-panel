@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import React, {useState} from "react";
 import {useRouter} from "next/navigation";
@@ -13,7 +12,7 @@ const initialFormState: RegisterUserRequest = {
     firstName: "", password: "",
     email: "", userName: ""
 };
-export default function SignUpForm() {
+export default function RegisterForm() {
     const router = useRouter()
     const [isVisible, setIsVisible] = useState(false);
     const [backendError, setBackendError] = useState("");
@@ -55,7 +54,7 @@ export default function SignUpForm() {
         console.log("register response", response)
         if (response.statusCode === 200) {
             setRegisterFormData(initialFormState)
-            router.push('/login')
+            router.push('/auth/login')
         } else {
             setBackendError(response.message ?? "Unknown error occurred");
         }
@@ -215,7 +214,7 @@ export default function SignUpForm() {
                             <div className="mt-6 text-center">
                                 <p>
                                     Already have an account?{" "}
-                                    <Link href="/auth/signin" className="text-primary">
+                                    <Link href="/auth/login" className="text-primary">
                                         Sign in
                                     </Link>
                                 </p>
