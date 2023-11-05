@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import {AuthProvider} from "@/context/authProvider";
+import { UIProvider } from '@/context/uiProvider';
 
 export const metadata: Metadata = {
   title: 'Admin Panel',
@@ -13,7 +15,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+      <UIProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </UIProvider>
+      </body>
     </html>
   )
 }

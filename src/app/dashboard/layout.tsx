@@ -1,16 +1,16 @@
 "use client";
 import "./../globals.css";
 import "./data-tables-css.css";
-import {useState, useEffect} from "react";
+import React, {useState, useEffect} from "react";
 import Loader from "@/components/common/Loader";
 import Header from "@/components/shared/navs/header/Header";
 import Sidebar from "@/components/shared/navs/sidebar/SideBar";
+import {useAuth} from "@/hooks/useAuth";
+import {useRouter} from "next/navigation";
+import NotAuthenticated from "@/components/common/NotAuthenticated";
 
-export default function RootLayout({
-                                       children,
-                                   }: {
-    children: React.ReactNode;
-}) {
+export default function DashboardLayout({children}: { children: React.ReactNode; }) {
+    const {user} = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -18,9 +18,11 @@ export default function RootLayout({
         setTimeout(() => setLoading(false), 1000);
     }, []);
 
+    if (!user) {
+        return <NotAuthenticated/>
+    }
+
     return (
-        <html lang="en">
-        <body suppressHydrationWarning={true}>
         <div className="dark:bg-boxdark-2 dark:text-bodydark">
             {loading ? (
                 <Loader/>
@@ -54,7 +56,5 @@ export default function RootLayout({
                 </div>
             )}
         </div>
-        </body>
-        </html>
     );
 }

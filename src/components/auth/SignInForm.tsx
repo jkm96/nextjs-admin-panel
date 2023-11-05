@@ -1,9 +1,71 @@
+"use client";
 import Link from "next/link";
-import React from "react";
-import EmailSvgIcon from "@/components/shared/icons/EmailSvgIcon";
-import PassSvgIcon from "@/components/shared/icons/PassSvgIcon";
+import React, {useEffect, useState} from "react";
+import {validateLoginFormInputErrors} from "@/helpers/validationHelpers";
+import {useAuth} from "@/hooks/useAuth";
+import {useRouter} from "next/navigation";
+import {LoginUserRequest} from "@/interfaces/auth";
+import {TokenResponse} from "@/interfaces/token";
+import {loginUser} from "@/lib/auth/authService";
+import {Input} from "@nextui-org/react";
+import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";
+import {Button} from "@nextui-org/button";
+
+const initialFormState: LoginUserRequest = {
+    email: "", password: ""
+};
 
 export default function SignInForm() {
+    const {user,storeAuthToken} = useAuth();
+    const router = useRouter()
+    useEffect(() => {
+        if (user){
+            router.push("/profile")
+        }
+    }, [user, router]);
+
+    const [isVisible, setIsVisible] = useState(false);
+    const [backendError, setBackendError] = useState("");
+    const [inputErrors, setInputErrors] = useState({
+        email: "", password: "",
+    });
+    const toggleVisibility = () => setIsVisible(!isVisible);
+    const [loginFormData, setLoginFormData] = useState(initialFormState);
+
+    const handleChange = (e: any) => {
+        const {name, value} = e.target;
+        setLoginFormData({...loginFormData, [name]: value});
+    }
+
+    const handleLoginSubmit = async (e: any) => {
+        e.preventDefault();
+        setBackendError("");
+
+        const inputErrors = validateLoginFormInputErrors(loginFormData);
+
+        if (inputErrors && Object.keys(inputErrors).length > 0) {
+            setInputErrors(inputErrors);
+            return;
+        }
+
+        if (
+            loginFormData.email.trim() === "" ||
+            loginFormData.password.trim() === ""
+        ) {
+            return;
+        }
+
+        let response = await loginUser(loginFormData);
+        if (response.statusCode === 200) {
+            console.log("login response", response)
+            setLoginFormData(initialFormState)
+            let responseData: TokenResponse = response.data;
+            storeAuthToken(responseData);
+            router.push("/profile")
+        } else {
+            setBackendError(response.message ?? "Unknown error occurred");
+        }
+    };
     return (
         <>
             <div className="grid place-items-center">
@@ -16,43 +78,57 @@ export default function SignInForm() {
                             </h2>
                         </div>
 
-                        <form>
-                            <div className="mb-4">
-                                <label className="mb-2.5 block font-medium text-black dark:text-white">
-                                    Email
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="email"
-                                        placeholder="Enter your email"
-                                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                    />
-
-                                    <span className="absolute right-4 top-4"><EmailSvgIcon/></span>
-                                </div>
+                        <form onSubmit={handleLoginSubmit}>
+                            <div className="flex flex-wrap md:flex-nowrap gap-4 m-2">
+                                <Input type="text"
+                                       value={loginFormData.email}
+                                       label="Email"
+                                       name="email"
+                                       variant={"bordered"}
+                                       placeholder="Enter your email"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, email: ""});
+                                       }}
+                                       isInvalid={inputErrors.email !== ""}
+                                       errorMessage={inputErrors.email}/>
                             </div>
 
-                            <div className="mb-6">
-                                <label className="mb-2.5 block font-medium text-black dark:text-white">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        placeholder="6+ Characters, 1 Capital letter"
-                                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                    />
-
-                                    <span className="absolute right-4 top-4"><PassSvgIcon/></span>
-                                </div>
+                            <div className="flex flex-wrap md:flex-nowrap gap-4 m-2">
+                                <Input type={isVisible ? "text" : "password"}
+                                       onChange={handleChange}
+                                       value={loginFormData.password}
+                                       label="Password"
+                                       name="password"
+                                       variant="bordered"
+                                       placeholder="Enter your password"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, password: ""});
+                                       }}
+                                       isInvalid={inputErrors.password !== ""}
+                                       errorMessage={inputErrors.password}
+                                       endContent={
+                                           <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
+                                               {isVisible ? (
+                                                   <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none"/>
+                                               ) : (
+                                                   <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none"/>
+                                               )}
+                                           </button>
+                                       }
+                                />
                             </div>
 
-                            <div className="mb-5">
-                                <input
+                            <div className="m-2">
+                                {backendError && <p className="text-danger">{backendError}</p>}
+                            </div>
+
+                            <div className="flex flex-wrap md:flex-nowrap gap-4 m-2">
+                                <Button
                                     type="submit"
                                     value="Sign In"
+                                    size="lg"
                                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                                />
+                                >Sign In</Button>
                             </div>
 
                             <div className="mt-6 text-center">

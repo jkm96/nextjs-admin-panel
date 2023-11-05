@@ -1,79 +1,207 @@
+"use client";
 import Link from "next/link";
-import React from "react";
-import PersonSvgIcon from "@/components/shared/icons/PersonSvgIcon";
-import EmailSvgIcon from "@/components/shared/icons/EmailSvgIcon";
-import PassSvgIcon from "@/components/shared/icons/PassSvgIcon";
+import React, {useState} from "react";
+import {useRouter} from "next/navigation";
+import {RegisterUserRequest} from "@/interfaces/auth";
+import {validateRegisterFormInputErrors} from "@/helpers/validationHelpers";
+import {Input} from "@nextui-org/react";
+import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";
+import {registerUser} from "@/lib/auth/authService";
 
+const initialFormState: RegisterUserRequest = {
+    lastName: "", phoneNumber: "",
+    firstName: "", password: "",
+    email: "", userName: ""
+};
 export default function SignUpForm() {
+    const router = useRouter()
+    const [isVisible, setIsVisible] = useState(false);
+    const [backendError, setBackendError] = useState("");
+    const toggleVisibility = () => setIsVisible(!isVisible);
+    const [registerFormData, setRegisterFormData] = useState(initialFormState);
+    const [inputErrors, setInputErrors] = useState({
+        lastName: "", phoneNumber: "",
+        firstName: "", password: "",
+        email: "", userName: ""
+    });
+
+    const handleChange = (e: any) => {
+        const {name, value} = e.target;
+        setRegisterFormData({...registerFormData, [name]: value});
+    }
+
+    const handleRegisterSubmit = async (e: any) => {
+        e.preventDefault();
+        setBackendError("");
+
+        const inputErrors = validateRegisterFormInputErrors(registerFormData);
+
+        if (inputErrors && Object.keys(inputErrors).length > 0) {
+            setInputErrors(inputErrors);
+            return;
+        }
+
+        if (
+            registerFormData.email.trim() === "" ||
+            registerFormData.userName.trim() === "" ||
+            registerFormData.firstName.trim() === "" ||
+            registerFormData.lastName.trim() === "" ||
+            registerFormData.password.trim() === ""
+        ) {
+            return;
+        }
+
+        let response = await registerUser(registerFormData);
+        console.log("register response", response)
+        if (response.statusCode === 200) {
+            setRegisterFormData(initialFormState)
+            router.push('/login')
+        } else {
+            setBackendError(response.message ?? "Unknown error occurred");
+        }
+    };
     return (
         <>
             <div className="grid place-items-center">
                 <div className="w-full border-stroke dark:border-strokedark xl:w-1/3">
                     <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-                        <span className="mb-1.5 block font-medium">Start for free</span>
-                        <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                            Sign Up to Admin Panel
-                        </h2>
+                        <div className="text-center">
+                            <span className="mb-1.5 block font-medium">Start for free</span>
+                            <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
+                                Sign Up to Admin Panel
+                            </h2>
+                        </div>
 
                         <form>
                             <div className="mb-4">
-                                <label className="mb-2.5 block font-medium text-black dark:text-white">
-                                    Name
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter your full name"
-                                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                    />
-
-                                    <span className="absolute right-4 top-4"><PersonSvgIcon/></span>
-                                </div>
+                                <Input type="text"
+                                       onChange={handleChange}
+                                       value={registerFormData.userName}
+                                       label="Username"
+                                       name="userName"
+                                       variant={"bordered"}
+                                       placeholder="Enter your username"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, userName: ""});
+                                       }}
+                                       isInvalid={inputErrors.userName !== ""}
+                                       errorMessage={inputErrors.userName}/>
                             </div>
 
                             <div className="mb-4">
-                                <label className="mb-2.5 block font-medium text-black dark:text-white">
-                                    Email
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="email"
-                                        placeholder="Enter your email"
-                                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                    />
-
-                                    <span className="absolute right-4 top-4"><EmailSvgIcon/></span>
-                                </div>
+                                <Input type="email"
+                                       onChange={handleChange}
+                                       value={registerFormData.email}
+                                       label="Email"
+                                       name="email"
+                                       variant={"bordered"}
+                                       placeholder="Enter your email"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, email: ""});
+                                       }}
+                                       isInvalid={inputErrors.email !== ""}
+                                       errorMessage={inputErrors.email}/>
                             </div>
 
                             <div className="mb-4">
-                                <label className="mb-2.5 block font-medium text-black dark:text-white">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        placeholder="Enter your password"
-                                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                    />
-
-                                    <span className="absolute right-4 top-4"><PassSvgIcon/></span>
-                                </div>
+                                <Input type="text"
+                                       onChange={handleChange}
+                                       value={registerFormData.firstName}
+                                       label="FirstName"
+                                       name="firstName"
+                                       variant={"bordered"}
+                                       placeholder="Enter your first name"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, firstName: ""});
+                                       }}
+                                       isInvalid={inputErrors.firstName !== ""}
+                                       errorMessage={inputErrors.firstName}/>
                             </div>
 
-                            <div className="mb-6">
-                                <label className="mb-2.5 block font-medium text-black dark:text-white">
-                                    Confirm Password
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        placeholder="Re-enter your password"
-                                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                    />
+                            <div className="mb-4">
+                                <Input type="text"
+                                       onChange={handleChange}
+                                       value={registerFormData.lastName}
+                                       label="LastName"
+                                       name="lastName"
+                                       variant={"bordered"}
+                                       placeholder="Enter your last name"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, lastName: ""});
+                                       }}
+                                       isInvalid={inputErrors.lastName !== ""}
+                                       errorMessage={inputErrors.lastName}/>
+                            </div>
 
-                                    <span className="absolute right-4 top-4"><PassSvgIcon/></span>
-                                </div>
+                            <div className="mb-4">
+                                <Input type="text"
+                                       onChange={handleChange}
+                                       value={registerFormData.phoneNumber}
+                                       label="PhoneNumber"
+                                       name="phoneNumber"
+                                       variant={"bordered"}
+                                       placeholder="Enter your phone number"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, phoneNumber: ""});
+                                       }}
+                                       isInvalid={inputErrors.phoneNumber !== ""}
+                                       errorMessage={inputErrors.phoneNumber}/>
+                            </div>
+
+                            <div className="mb-4">
+                                <Input type={isVisible ? "text" : "password"}
+                                       onChange={handleChange}
+                                       value={registerFormData.password}
+                                       label="Password"
+                                       name="password"
+                                       variant="bordered"
+                                       placeholder="Enter your password"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, password: ""});
+                                       }}
+                                       isInvalid={inputErrors.password !== ""}
+                                       errorMessage={inputErrors.password}
+                                       endContent={
+                                           <button className="focus:outline-none" type="button"
+                                                   onClick={toggleVisibility}>
+                                               {isVisible ? (
+                                                   <EyeSlashFilledIcon
+                                                       className="text-2xl text-default-400 pointer-events-none"/>
+                                               ) : (
+                                                   <EyeFilledIcon
+                                                       className="text-2xl text-default-400 pointer-events-none"/>
+                                               )}
+                                           </button>
+                                       }
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <Input type={isVisible ? "text" : "password"}
+                                       onChange={handleChange}
+                                       value={registerFormData.password}
+                                       label="Password"
+                                       name="password"
+                                       variant="bordered"
+                                       placeholder="Enter your password"
+                                       onInput={() => {
+                                           setInputErrors({...inputErrors, password: ""});
+                                       }}
+                                       isInvalid={inputErrors.password !== ""}
+                                       errorMessage={inputErrors.password}
+                                       endContent={
+                                           <button className="focus:outline-none" type="button"
+                                                   onClick={toggleVisibility}>
+                                               {isVisible ? (
+                                                   <EyeSlashFilledIcon
+                                                       className="text-2xl text-default-400 pointer-events-none"/>
+                                               ) : (
+                                                   <EyeFilledIcon
+                                                       className="text-2xl text-default-400 pointer-events-none"/>
+                                               )}
+                                           </button>
+                                       }
+                                />
                             </div>
 
                             <div className="mb-5">
