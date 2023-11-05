@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {validateLoginFormInputErrors} from "@/helpers/validationHelpers";
 import {useAuth} from "@/hooks/useAuth";
 import {useRouter} from "next/navigation";
@@ -17,13 +17,14 @@ const initialFormState: LoginUserRequest = {
 export default function LoginForm() {
     const {storeAuthToken} = useAuth();
     const router = useRouter()
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [backendError, setBackendError] = useState("");
+    const [loginFormData, setLoginFormData] = useState(initialFormState);
     const [inputErrors, setInputErrors] = useState({
         email: "", password: "",
     });
     const toggleVisibility = () => setIsVisible(!isVisible);
-    const [loginFormData, setLoginFormData] = useState(initialFormState);
 
     const handleChange = (e: any) => {
         const {name, value} = e.target;
@@ -33,11 +34,13 @@ export default function LoginForm() {
     const handleLoginSubmit = async (e: any) => {
         e.preventDefault();
         setBackendError("");
+        setIsSubmitting(true);
 
         const inputErrors = validateLoginFormInputErrors(loginFormData);
 
         if (inputErrors && Object.keys(inputErrors).length > 0) {
             setInputErrors(inputErrors);
+            setIsSubmitting(false);
             return;
         }
 
@@ -45,17 +48,20 @@ export default function LoginForm() {
             loginFormData.email.trim() === "" ||
             loginFormData.password.trim() === ""
         ) {
+            setIsSubmitting(false);
             return;
         }
 
         let response = await loginUser(loginFormData);
         if (response.statusCode === 200) {
             console.log("login response", response)
+            setIsSubmitting(false);
             setLoginFormData(initialFormState)
             let responseData: TokenResponse = response.data;
             storeAuthToken(responseData);
             router.push("/dashboard")
         } else {
+            setIsSubmitting(false);
             setBackendError(response.message ?? "Unknown error occurred");
         }
     };
@@ -101,11 +107,14 @@ export default function LoginForm() {
                                        isInvalid={inputErrors.password !== ""}
                                        errorMessage={inputErrors.password}
                                        endContent={
-                                           <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
+                                           <button className="focus:outline-none" type="button"
+                                                   onClick={toggleVisibility}>
                                                {isVisible ? (
-                                                   <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none"/>
+                                                   <EyeSlashFilledIcon
+                                                       className="text-2xl text-default-400 pointer-events-none"/>
                                                ) : (
-                                                   <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none"/>
+                                                   <EyeFilledIcon
+                                                       className="text-2xl text-default-400 pointer-events-none"/>
                                                )}
                                            </button>
                                        }
@@ -122,7 +131,9 @@ export default function LoginForm() {
                                     value="Sign In"
                                     size="lg"
                                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                                >Sign In</Button>
+                                >
+                                    {isSubmitting ? "Submitting..." : "Sign In"}
+                                </Button>
                             </div>
 
                             <div className="mt-6 text-center">

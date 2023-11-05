@@ -6,6 +6,7 @@ import {validateRegisterFormInputErrors} from "@/helpers/validationHelpers";
 import {Input} from "@nextui-org/react";
 import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";
 import {registerUser} from "@/lib/auth/authService";
+import {Button} from "@nextui-org/button";
 
 const initialFormState: RegisterUserRequest = {
     lastName: "", phoneNumber: "",
@@ -14,6 +15,7 @@ const initialFormState: RegisterUserRequest = {
 };
 export default function RegisterForm() {
     const router = useRouter()
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [backendError, setBackendError] = useState("");
     const toggleVisibility = () => setIsVisible(!isVisible);
@@ -32,11 +34,13 @@ export default function RegisterForm() {
     const handleRegisterSubmit = async (e: any) => {
         e.preventDefault();
         setBackendError("");
+        setIsSubmitting(true)
 
         const inputErrors = validateRegisterFormInputErrors(registerFormData);
 
         if (inputErrors && Object.keys(inputErrors).length > 0) {
             setInputErrors(inputErrors);
+            setIsSubmitting(false)
             return;
         }
 
@@ -47,15 +51,18 @@ export default function RegisterForm() {
             registerFormData.lastName.trim() === "" ||
             registerFormData.password.trim() === ""
         ) {
+            setIsSubmitting(false)
             return;
         }
 
         let response = await registerUser(registerFormData);
         console.log("register response", response)
         if (response.statusCode === 200) {
+            setIsSubmitting(false)
             setRegisterFormData(initialFormState)
             router.push('/auth/login')
         } else {
+            setIsSubmitting(false)
             setBackendError(response.message ?? "Unknown error occurred");
         }
     };
@@ -71,7 +78,7 @@ export default function RegisterForm() {
                             </h2>
                         </div>
 
-                        <form>
+                        <form onSubmit={handleRegisterSubmit}>
                             <div className="mb-4">
                                 <Input type="text"
                                        onChange={handleChange}
@@ -204,11 +211,13 @@ export default function RegisterForm() {
                             </div>
 
                             <div className="mb-5">
-                                <input
+                                <Button
                                     type="submit"
                                     value="Create account"
                                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                                />
+                                >
+                                    {isSubmitting ? "Submitting..." : "Create Account"}
+                                </Button>
                             </div>
 
                             <div className="mt-6 text-center">
