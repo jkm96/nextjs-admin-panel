@@ -1,4 +1,4 @@
-import {User} from "@/interfaces/user";
+import {User} from "@/boundary/interfaces/user";
 import Breadcrumb from "@/components/breadcrumbs/Breadcrumb";
 import Image from "next/image";
 import CameraIcon from "@/components/shared/icons/CameraIcon";

@@ -1,6 +1,6 @@
 import {createContext} from "react";
-import {User} from "@/interfaces/user";
-import {TokenResponse} from "@/interfaces/token";
+import {User} from "@/boundary/interfaces/user";
+import {TokenResponse} from "@/boundary/interfaces/token";
 
 const AuthContextDefaultValue = {
     user: null as User | null,

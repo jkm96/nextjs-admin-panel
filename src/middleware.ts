@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {setCookieOnResponseHeaders} from "@/helpers/tokenHelpers";
-import {apiKey, internalBaseUrl} from "@/constants/appConstants";
+import {apiKey, internalBaseUrl} from "@/boundary/constants/appConstants";
 import {getAccessToken} from "@/lib/token/tokenService";
 
 export async function middleware(request: NextRequest) {

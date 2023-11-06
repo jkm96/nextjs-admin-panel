@@ -1,7 +1,7 @@
 import {NextRequest} from "next/server";
-import {RefreshTokenRequest, StoreTokenRequest, TokenResponse} from "@/interfaces/token";
+import {RefreshTokenRequest, StoreTokenRequest, TokenResponse} from "@/boundary/interfaces/token";
 import adminApiClient from "@/lib/axios/axiosClient";
-import {cookieName} from "@/constants/appConstants";
+import {cookieName} from "@/boundary/constants/appConstants";
 import {createNextResponse} from "@/helpers/responseHelpers";
 
 export async function POST(request: NextRequest) {

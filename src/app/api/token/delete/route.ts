@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {cookieName} from "@/constants/appConstants";
+import {cookieName} from "@/boundary/constants/appConstants";
 
 export async function POST(request: NextRequest) {
     try {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React, {useState} from "react";
 import {useRouter} from "next/navigation";
-import {RegisterUserRequest} from "@/interfaces/auth";
+import {RegisterUserRequest} from "@/boundary/interfaces/auth";
 import {validateRegisterFormInputErrors} from "@/helpers/validationHelpers";
 import {Input} from "@nextui-org/react";
 import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";

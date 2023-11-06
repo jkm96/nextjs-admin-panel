@@ -1,4 +1,4 @@
-import {LoginUserRequest, RegisterUserRequest} from "@/interfaces/auth";
+import {LoginUserRequest, RegisterUserRequest} from "@/boundary/interfaces/auth";
 
 export function isEmailValid (email: string): boolean{
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

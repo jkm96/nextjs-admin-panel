@@ -1,4 +1,4 @@
-import {User} from "@/interfaces/user";
+import {User} from "@/boundary/interfaces/user";
 import {useRouter} from "next/navigation";
 import {useEffect} from "react";
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as https from "https";
-import {adminApiBaseUrl} from "@/constants/appConstants";
+import {adminApiBaseUrl} from "@/boundary/constants/appConstants";
 
 const adminApiClient = axios.create({
     baseURL: `${adminApiBaseUrl}`,

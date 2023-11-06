@@ -1,5 +1,5 @@
-import {StoreTokenRequest} from "@/interfaces/token";
-import {apiKey, internalBaseUrl} from "@/constants/appConstants";
+import {StoreTokenRequest} from "@/boundary/interfaces/token";
+import {apiKey, internalBaseUrl} from "@/boundary/constants/appConstants";
 
 export async function storeAccessTokenInCookie(storeTokenRequest: StoreTokenRequest) {
     try {

@@ -1,8 +1,8 @@
 "use client";
 import React, {useEffect, useState} from "react";
-import {User} from "@/interfaces/user";
+import {User} from "@/boundary/interfaces/user";
 import AuthContext from "./authContext";
-import {StoreTokenRequest, TokenResponse} from "@/interfaces/token";
+import {StoreTokenRequest, TokenResponse} from "@/boundary/interfaces/token";
 import {deleteAccessToken, getAccessToken, storeAccessTokenInCookie} from "@/lib/token/tokenService";
 import {getUserDetails} from "@/lib/jwt/readAuthToken";
 
