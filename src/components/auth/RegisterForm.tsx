@@ -9,9 +9,8 @@ import {registerUser} from "@/lib/auth/authService";
 import {Button} from "@nextui-org/button";
 
 const initialFormState: RegisterUserRequest = {
-    lastName: "", phoneNumber: "",
-    firstName: "", password: "",
-    email: "", userName: ""
+    email: "",   lastName: "",
+    firstName: "", password: "",confirmPassword: ""
 };
 export default function RegisterForm() {
     const router = useRouter()
@@ -21,9 +20,8 @@ export default function RegisterForm() {
     const toggleVisibility = () => setIsVisible(!isVisible);
     const [registerFormData, setRegisterFormData] = useState(initialFormState);
     const [inputErrors, setInputErrors] = useState({
-        lastName: "", phoneNumber: "",
-        firstName: "", password: "",
-        email: "", userName: ""
+        email: "",   lastName: "",
+        firstName: "", password: "",confirmPassword: ""
     });
 
     const handleChange = (e: any) => {
@@ -46,10 +44,10 @@ export default function RegisterForm() {
 
         if (
             registerFormData.email.trim() === "" ||
-            registerFormData.userName.trim() === "" ||
             registerFormData.firstName.trim() === "" ||
             registerFormData.lastName.trim() === "" ||
-            registerFormData.password.trim() === ""
+            registerFormData.password.trim() === ""||
+            registerFormData.confirmPassword.trim() === ""
         ) {
             setIsSubmitting(false)
             return;
@@ -79,21 +77,6 @@ export default function RegisterForm() {
                         </div>
 
                         <form onSubmit={handleRegisterSubmit}>
-                            <div className="mb-4">
-                                <Input type="text"
-                                       onChange={handleChange}
-                                       value={registerFormData.userName}
-                                       label="Username"
-                                       name="userName"
-                                       variant={"bordered"}
-                                       placeholder="Enter your username"
-                                       onInput={() => {
-                                           setInputErrors({...inputErrors, userName: ""});
-                                       }}
-                                       isInvalid={inputErrors.userName !== ""}
-                                       errorMessage={inputErrors.userName}/>
-                            </div>
-
                             <div className="mb-4">
                                 <Input type="email"
                                        onChange={handleChange}
@@ -140,21 +123,6 @@ export default function RegisterForm() {
                             </div>
 
                             <div className="mb-4">
-                                <Input type="text"
-                                       onChange={handleChange}
-                                       value={registerFormData.phoneNumber}
-                                       label="PhoneNumber"
-                                       name="phoneNumber"
-                                       variant={"bordered"}
-                                       placeholder="Enter your phone number"
-                                       onInput={() => {
-                                           setInputErrors({...inputErrors, phoneNumber: ""});
-                                       }}
-                                       isInvalid={inputErrors.phoneNumber !== ""}
-                                       errorMessage={inputErrors.phoneNumber}/>
-                            </div>
-
-                            <div className="mb-4">
                                 <Input type={isVisible ? "text" : "password"}
                                        onChange={handleChange}
                                        value={registerFormData.password}
@@ -185,16 +153,16 @@ export default function RegisterForm() {
                             <div className="mb-4">
                                 <Input type={isVisible ? "text" : "password"}
                                        onChange={handleChange}
-                                       value={registerFormData.password}
-                                       label="Password"
-                                       name="password"
+                                       value={registerFormData.confirmPassword}
+                                       label="Confirm Password"
+                                       name="confirmPassword"
                                        variant="bordered"
-                                       placeholder="Enter your password"
+                                       placeholder="Enter your confirm password"
                                        onInput={() => {
-                                           setInputErrors({...inputErrors, password: ""});
+                                           setInputErrors({...inputErrors, confirmPassword: ""});
                                        }}
-                                       isInvalid={inputErrors.password !== ""}
-                                       errorMessage={inputErrors.password}
+                                       isInvalid={inputErrors.confirmPassword !== ""}
+                                       errorMessage={inputErrors.confirmPassword}
                                        endContent={
                                            <button className="focus:outline-none" type="button"
                                                    onClick={toggleVisibility}>
@@ -208,6 +176,10 @@ export default function RegisterForm() {
                                            </button>
                                        }
                                 />
+                            </div>
+
+                            <div className="m-2">
+                                {backendError && <p className="text-danger">{backendError}</p>}
                             </div>
 
                             <div className="mb-5">
