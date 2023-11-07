@@ -1,4 +1,4 @@
-export default function LogoutSvgIcon() {
+export default function LogoutIcon() {
     return (
         <svg
             className="fill-current"

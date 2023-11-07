@@ -6,7 +6,7 @@ import Loader from "@/components/common/Loader";
 import Header from "@/components/shared/navs/header/Header";
 import Sidebar from "@/components/shared/navs/sidebar/SideBar";
 import {useAuth} from "@/hooks/useAuth";
-import NotAuthenticated from "@/components/common/NotAuthenticated";
+import NotAuthenticated from "@/components/common/auth/NotAuthenticated";
 
 export default function DashboardLayout({children}: { children: React.ReactNode; }) {
     const {user,loading: authLoading} = useAuth();

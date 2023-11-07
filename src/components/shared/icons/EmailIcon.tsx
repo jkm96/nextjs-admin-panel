@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function EmailSvgIcon() {
+export default function EmailIcon() {
     return (
         <svg
             className="fill-current"

@@ -9,6 +9,7 @@ import {loginUser} from "@/lib/auth/authService";
 import {Input} from "@nextui-org/react";
 import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";
 import {Button} from "@nextui-org/button";
+import {toast} from "react-toastify";
 
 const initialFormState: LoginUserRequest = {
     email: "", password: ""
@@ -55,6 +56,7 @@ export default function LoginForm() {
         let response = await loginUser(loginFormData);
         if (response.statusCode === 200) {
             console.log("login response", response)
+            toast.success("Logged in successfully")
             setIsSubmitting(false);
             setLoginFormData(initialFormState)
             let responseData: TokenResponse = response.data;
@@ -62,7 +64,8 @@ export default function LoginForm() {
             router.push("/dashboard")
         } else {
             setIsSubmitting(false);
-            setBackendError(response.message ?? "Unknown error occurred");
+            toast.error(response.message ?? "Unknown error occurred")
+            // setBackendError(response.message ?? "Unknown error occurred");
         }
     };
     return (
@@ -76,7 +79,6 @@ export default function LoginForm() {
                                 Sign In to Admin Panel
                             </h2>
                         </div>
-
                         <form onSubmit={handleLoginSubmit}>
                             <div className="flex flex-wrap md:flex-nowrap gap-4 m-2">
                                 <Input type="text"

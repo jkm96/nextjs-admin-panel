@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
 import SidebarLinkGroup from "./SidebarLinkGroup";
-import SettingsSvgIcon from "@/components/shared/icons/SettingsSvgIcon";
+import SettingsIcon from "@/components/shared/icons/SettingsIcon";
 import SidebarOpenIcon from "@/components/shared/icons/SidebarOpenIcon";
 import DashboardIcon from "@/components/shared/icons/DashboardIcon";
 import ShowMenuList from "@/components/common/ShowMenuList";
@@ -148,7 +148,7 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                         {/* <!-- Menu Item Forms --> */}
                         <SidebarLinkGroup
                             activeCondition={
-                                pathname === "/forms" || pathname.includes("forms")
+                                pathname === "/dashboard/users" || pathname.includes("users")
                             }>
                             {(handleClick, open) => {
                                 return (
@@ -156,8 +156,8 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                                         <Link
                                             href="#"
                                             className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                                                (pathname === "/forms" ||
-                                                    pathname.includes("forms")) &&
+                                                (pathname === "/dashboard/users" ||
+                                                    pathname.includes("users")) &&
                                                 "bg-graydark dark:bg-meta-4"
                                             }`}
                                             onClick={(e) => {
@@ -167,7 +167,7 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                                                     : setSidebarExpanded(true);
                                             }}>
                                             <FormIcon/>
-                                            Forms
+                                            Account Management
                                             {ShowMenuList(open)}
                                         </Link>
                                         {/* <!-- Dropdown Menu Start --> */}
@@ -179,24 +179,24 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                                             <ul className="mt-2 flex flex-col gap-2.5 pl-6">
                                                 <li>
                                                     <Link
-                                                        href="/forms/form-elements"
+                                                        href="/dashboard/users"
                                                         className={`first-letter:group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                                            pathname === "/forms/form-elements" &&
+                                                            pathname === "/dashboard/users" &&
                                                             "text-white"
                                                         }`}
                                                     >
-                                                        Form Elements
+                                                       Users
                                                     </Link>
                                                 </li>
                                                 <li>
                                                     <Link
-                                                        href="/forms/form-layout"
+                                                        href="/dashboard/roles"
                                                         className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
-                                                            pathname === "/forms/form-layout" &&
+                                                            pathname === "/dashboard/roles" &&
                                                             "text-white"
                                                         }`}
                                                     >
-                                                        Form Layout
+                                                       Roles
                                                     </Link>
                                                 </li>
                                             </ul>
@@ -231,7 +231,7 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                                     "bg-graydark dark:bg-meta-4"
                                 }`}
                             >
-                                <SettingsSvgIcon/>
+                                <SettingsIcon/>
                                 Settings
                             </Link>
                         </li>

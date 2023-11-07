@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function PassSvgIcon() {
+export default function PasswordIcon() {
     return (
         <svg
             className="fill-current"

@@ -1,7 +1,7 @@
 import {useEffect} from "react";
 import {hasRequiredPermissions} from "@/helpers/permissionsHelper";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
-import AuthorizeComponent from "@/components/common/AuthorizeComponent";
+import AuthorizeComponent from "@/components/common/auth/AuthorizeComponent";
 
 function DashboardPage() {
     useEffect(() => {

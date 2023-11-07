@@ -28,7 +28,7 @@ export default function ProfileSection({user}: ProfileSectionProps) {
                             className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary py-1 px-2 text-sm font-medium text-white hover:bg-opacity-80 xsm:px-4"
                         >
                             <input type="file" name="cover" id="cover" className="sr-only"/>
-                            <span>                <CameraIcon/>              </span>
+                            <span><CameraIcon/></span>
                             <span>Edit</span>
                         </label>
                     </div>
@@ -63,7 +63,7 @@ export default function ProfileSection({user}: ProfileSectionProps) {
                         </h3>
                         <p className="font-medium">{user?.email}</p>
 
-                         <div className="mx-auto max-w-180">
+                        <div className="mx-auto max-w-180">
                             <h4 className="font-semibold text-black dark:text-white">
                                 About Me
                             </h4>

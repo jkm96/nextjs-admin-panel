@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from 'react';
 import {hasRequiredPermissions} from "@/helpers/permissionsHelper";
-import Authorizing from "@/components/common/Authorizing";
-import PermissionDeniedMessage from "@/components/common/PermissionDeniedMessage";
+import Authorizing from "@/components/common/auth/Authorizing";
+import PermissionDeniedMessage from "@/components/common/auth/PermissionDeniedMessage";
 
 const AuthorizeComponent = (requiredPermissions:any) => (WrappedComponent:any) => {
     const AuthComponent = (props:any) => {
