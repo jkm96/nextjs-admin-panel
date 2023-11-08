@@ -7,11 +7,9 @@ export interface PagingMetaData {
     hasNext: boolean;
 }
 
-export interface PagedResponse<T> {
-    data: {
-        pagingMetaData: PagingMetaData;
-        data: T[];
-    };
+export  interface PagedResponse {
+    data: any;
+    pagingMetaData: PagingMetaData;
     statusCode: number;
     message: string;
     succeeded: boolean;

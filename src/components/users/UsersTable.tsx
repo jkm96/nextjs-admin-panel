@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {
     Table,
     TableHeader,
@@ -17,8 +17,18 @@ import {
     Pagination,
     Selection,
     ChipProps,
-    SortDescriptor
+    SortDescriptor, user
 } from "@nextui-org/react";
+import {capitalize, statusOptions, users, userTableColumns} from "@/lib/utils/table";
+import {VerticalDotsIcon} from "@/components/shared/icons/VerticalDotsIcon";
+import {SearchIcon} from "@/components/shared/icons/SearchIcon";
+import {ChevronDownIcon} from "@/components/shared/icons/ChevronDownIcon";
+import {PlusIcon} from "@/components/shared/icons/PlusIcon";
+import {UserResponse} from "@/boundary/interfaces/user";
+import {UserQueryParameters} from "@/boundary/parameters/userQueryParameters";
+import {getUsers} from "@/lib/users/userService";
+import {PagedResponse} from "@/boundary/paging/paging";
+import {toast} from "react-toastify";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     active: "success",
@@ -31,6 +41,7 @@ const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"];
 type User = typeof users[0];
 
 export default function App() {
+    const [users, setUserList] = useState<UserResponse[]>([]);
     const [filterValue, setFilterValue] = React.useState("");
     const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
@@ -40,28 +51,44 @@ export default function App() {
         column: "age",
         direction: "ascending",
     });
-
     const [page, setPage] = React.useState(1);
 
     const hasSearchFilter = Boolean(filterValue);
 
     const headerColumns = React.useMemo(() => {
-        if (visibleColumns === "all") return columns;
+        if (visibleColumns === "all") return userTableColumns;
 
-        return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+        return userTableColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
+
+    const queryParams: UserQueryParameters = new UserQueryParameters();
+    useEffect(() => {
+        getUsers(queryParams)
+            .then(response => {
+                if (response.statusCode === 200) {
+                    console.log("response",response)
+                    const parsedData: PagedResponse = response.data;
+                    const { data, pagingMetaData } = parsedData;
+                    const usersList:UserResponse[] = data;
+                    setUserList(usersList);
+                }
+            })
+            .catch(error => {
+                toast.error(`Error fetching users ${error}`);
+            });
+    }, []);
 
     const filteredItems = React.useMemo(() => {
         let filteredUsers = [...users];
 
         if (hasSearchFilter) {
             filteredUsers = filteredUsers.filter((user) =>
-                user.name.toLowerCase().includes(filterValue.toLowerCase()),
+                user.email.toLowerCase().includes(filterValue.toLowerCase()),
             );
         }
         if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
             filteredUsers = filteredUsers.filter((user) =>
-                Array.from(statusFilter).includes(user.status),
+                Array.from(statusFilter).includes(user.isActive),
             );
         }
 
@@ -78,23 +105,26 @@ export default function App() {
     }, [page, filteredItems, rowsPerPage]);
 
     const sortedItems = React.useMemo(() => {
-        return [...items].sort((a: User, b: User) => {
-            const first = a[sortDescriptor.column as keyof User] as number;
-            const second = b[sortDescriptor.column as keyof User] as number;
+        return [...items].sort((a: UserResponse, b: UserResponse) => {
+            // @ts-ignore
+            const first = a[sortDescriptor.column] as number;
+            // @ts-ignore
+            const second = b[sortDescriptor.column] as number;
             const cmp = first < second ? -1 : first > second ? 1 : 0;
 
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
         });
     }, [sortDescriptor, items]);
 
-    const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
-        const cellValue = user[columnKey as keyof User];
+    const renderCell = React.useCallback((user: UserResponse, columnKey: React.Key) => {
+        // @ts-ignore
+        const cellValue = user[columnKey];
 
         switch (columnKey) {
             case "name":
                 return (
                     <User
-                        avatarProps={{radius: "lg", src: user.avatar}}
+                        // avatarProps={{radius: "lg", src: user.avatar}}
                         description={user.email}
                         name={cellValue}
                     >
@@ -120,7 +150,7 @@ export default function App() {
                         <Dropdown>
                             <DropdownTrigger>
                                 <Button isIconOnly size="sm" variant="light">
-                                    <VerticalDotsIcon className="text-default-300"/>
+                                    <VerticalDotsIcon className="text-default-300" />
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu>
@@ -162,10 +192,10 @@ export default function App() {
         }
     }, []);
 
-    const onClear = React.useCallback(() => {
+    const onClear = React.useCallback(()=>{
         setFilterValue("")
         setPage(1)
-    }, [])
+    },[])
 
     const topContent = React.useMemo(() => {
         return (
@@ -175,7 +205,7 @@ export default function App() {
                         isClearable
                         className="w-full sm:max-w-[44%]"
                         placeholder="Search by name..."
-                        startContent={<SearchIcon/>}
+                        startContent={<SearchIcon />}
                         value={filterValue}
                         onClear={() => onClear()}
                         onValueChange={onSearchChange}
@@ -183,7 +213,7 @@ export default function App() {
                     <div className="flex gap-3">
                         <Dropdown>
                             <DropdownTrigger className="hidden sm:flex">
-                                <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
+                                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
                                     Status
                                 </Button>
                             </DropdownTrigger>
@@ -204,7 +234,7 @@ export default function App() {
                         </Dropdown>
                         <Dropdown>
                             <DropdownTrigger className="hidden sm:flex">
-                                <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
+                                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
                                     Columns
                                 </Button>
                             </DropdownTrigger>
@@ -216,14 +246,14 @@ export default function App() {
                                 selectionMode="multiple"
                                 onSelectionChange={setVisibleColumns}
                             >
-                                {columns.map((column) => (
+                                {userTableColumns.map((column) => (
                                     <DropdownItem key={column.uid} className="capitalize">
                                         {capitalize(column.name)}
                                     </DropdownItem>
                                 ))}
                             </DropdownMenu>
                         </Dropdown>
-                        <Button color="primary" endContent={<PlusIcon/>}>
+                        <Button color="primary" endContent={<PlusIcon />}>
                             Add New
                         </Button>
                     </div>
@@ -257,10 +287,10 @@ export default function App() {
     const bottomContent = React.useMemo(() => {
         return (
             <div className="py-2 px-2 flex justify-between items-center">
-            <span className="w-[30%] text-small text-default-400">
-            {selectedKeys === "all"
-                ? "All items selected"
-                : `${selectedKeys.size} of ${filteredItems.length} selected`}
+        <span className="w-[30%] text-small text-default-400">
+          {selectedKeys === "all"
+              ? "All items selected"
+              : `${selectedKeys.size} of ${filteredItems.length} selected`}
         </span>
                 <Pagination
                     isCompact

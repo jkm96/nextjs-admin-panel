@@ -4,22 +4,20 @@ import {toast} from "react-toastify";
 import {PagedResponse} from "@/boundary/paging/paging";
 import {UserResponse} from "@/boundary/interfaces/user";
 import {useEffect, useState} from "react";
-import UserTableAction from "@/components/users/UserTableAction";
 
 export default function UsersMainSection() {
     const [userList, setUserList] = useState<UserResponse[]>([]);
-    const [searchQuery, setSearchQuery] = useState('');
 
     const queryParams: UserQueryParameters = new UserQueryParameters();
-    queryParams.searchTerm = searchQuery;
     useEffect(() => {
         getUsers(queryParams)
             .then(response => {
                 if (response.statusCode === 200) {
-                    const parsedData: PagedResponse<UserResponse> = response.data;
-                    const usersList: UserResponse[] = parsedData.data;
-                    console.log("user list", usersList)
-                    setUserList(usersList)
+                    console.log("response",response)
+                    const parsedData: PagedResponse = response.data;
+                    const { data, pagingMetaData } = parsedData;
+                    const usersList:UserResponse[] = data;
+                    setUserList(usersList);
                 }
             })
             .catch(error => {
@@ -29,7 +27,6 @@ export default function UsersMainSection() {
 
     return (
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <UserTableAction setSearchQuery={setSearchQuery}/>
             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -70,7 +67,7 @@ export default function UsersMainSection() {
                             {user.emailConfirmed.toString()}
                         </td>
                         <td className="px-6 py-4">
-                            {user.createdOn}
+                            {user.createdOn.toString()}
                         </td>
                     </tr>
                 ))}
