@@ -11,8 +11,8 @@ export interface UserResponse {
     firstName: string;
     lastName: string;
     email: string;
-    isActive: boolean;
-    emailConfirmed: boolean;
+    isActive: string;
+    emailConfirmed: string;
     phoneNumber: string | null;
     profilePictureDataUrl: string | null;
     enableEmailOtp: boolean;
