@@ -13,8 +13,8 @@ export interface UserResponse {
     email: string;
     isActive: boolean;
     emailConfirmed: boolean;
-    phoneNumber: string;
-    profilePictureDataUrl: string;
+    phoneNumber: string | null;
+    profilePictureDataUrl: string | null;
     enableEmailOtp: boolean;
     enableSmsOtp: boolean;
     changePasswordOnLogin: boolean;
