@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState, useEffect} from "react";
 import {
     Table,
     TableHeader,
@@ -6,124 +6,92 @@ import {
     TableBody,
     TableRow,
     TableCell,
-    Input,
+    Pagination,
+    Spinner,
     Button,
-    DropdownTrigger,
+    Input,
     Dropdown,
+    DropdownTrigger,
     DropdownMenu,
     DropdownItem,
-    Chip,
-    User,
-    Pagination,
+    SortDescriptor,
     Selection,
-    ChipProps,
-    SortDescriptor
+    User,
+    Chip, ChipProps,
 } from "@nextui-org/react";
-import {capitalize, statusOptions, userTableColumns} from "@/lib/utils/tableUtils";
-import {VerticalDotsIcon} from "@/components/shared/icons/VerticalDotsIcon";
-import {SearchIcon} from "@/components/shared/icons/SearchIcon";
-import {ChevronDownIcon} from "@/components/shared/icons/ChevronDownIcon";
-import {PlusIcon} from "@/components/shared/icons/PlusIcon";
+import {getUsers} from "@/lib/users/userService";
 import {UserResponse} from "@/boundary/interfaces/user";
 import {UserQueryParameters} from "@/boundary/parameters/userQueryParameters";
-import {getUsers} from "@/lib/users/userService";
-import {PagedResponse} from "@/boundary/paging/paging";
+import {SearchIcon} from "@/components/shared/icons/SearchIcon";
+import {ChevronDownIcon} from "@/components/shared/icons/ChevronDownIcon";
+import {capitalize, statusOptions, userTableColumns} from "@/lib/utils/tableUtils";
+import {PlusIcon} from "@/components/shared/icons/PlusIcon";
+import {VerticalDotsIcon} from "@/components/shared/icons/VerticalDotsIcon";
 import {toast} from "react-toastify";
-
-const statusColorMap: Record<string, ChipProps["color"]> = {
-    active: "success",
-    inactive: "danger",
-    confirmed: "success",
-    unconfirmed: "warning",
-};
+import isActive = toast.isActive;
+import {className} from "postcss-selector-parser";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "email", "status", "actions"];
-
 export default function UsersMainSection() {
-    const [users, setUserList] = useState<UserResponse[]>([]);
-    const [filterValue, setFilterValue] = React.useState("");
-    const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(0);
+    const [userList, setUserList] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
     const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    const [pages, setTotalPages] = React.useState(10);
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-        column: "email",
+        column: "name",
         direction: "ascending",
     });
-    const [page, setPage] = React.useState(1);
-
-    const hasSearchFilter = Boolean(filterValue);
-
+    const statusColorMap: Record<string, ChipProps["color"]> = {
+        active: "success",
+        inactive: "danger",
+        confirmed: "success",
+        unconfirmed: "warning",
+    };
     const headerColumns = React.useMemo(() => {
         if (visibleColumns === "all") return userTableColumns;
-
         return userTableColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
 
-    const queryParams: UserQueryParameters = new UserQueryParameters();
-    const fetchData = (queryParams:UserQueryParameters) => {
+    /**
+     * fetch user data from api
+     * @param queryParams
+     */
+    const fetchUsers = (queryParams: UserQueryParameters) => {
         getUsers(queryParams)
-            .then(response => {
+            .then((response) => {
                 if (response.statusCode === 200) {
-                    console.log("user data", response)
-                    const parsedData: PagedResponse = response.data;
+                    const parsedData = response.data;
                     const {data, pagingMetaData} = parsedData;
-                    console.log("paging Meta Data", pagingMetaData)
-                    setPage(pagingMetaData.currentPage);
+                    console.log("paging metadata", pagingMetaData)
+                    setCurrentPage(pagingMetaData.currentPage);
                     setRowsPerPage(pagingMetaData.pageSize);
-                    setTotalPages(pagingMetaData.totalPages)
-
-                    const usersList: UserResponse[] = data;
-                    setUserList(usersList);
+                    setTotalPages(pagingMetaData.totalPages);
+                    setUserList(data);
                 }
             })
-            .catch(error => {
-                toast.error(`Error fetching users ${error}`);
+            .catch((error) => {
+                console.error(`Error fetching users: ${error}`);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
-    }
+    };
 
     useEffect(() => {
-        fetchData(queryParams);
-    }, []);
+        setIsLoading(true);
+        const queryParams: UserQueryParameters = new UserQueryParameters();
+        queryParams.pageNumber = currentPage;
+        fetchUsers(queryParams);
+    }, [currentPage]);
 
-    useEffect(() => {
-        console.log("Users state updated:", users);
-    }, [users]);
-
-    const filteredItems = React.useMemo(() => {
-        let filteredUsers = [...users];
-
-        if (hasSearchFilter) {
-            filteredUsers = filteredUsers.filter((user) =>
-                user.firstName.toLowerCase().includes(filterValue.toLowerCase())||
-                user.lastName.toLowerCase().includes(filterValue.toLowerCase())||
-                user.email.toLowerCase().includes(filterValue.toLowerCase())||
-                user.userName.toLowerCase().includes(filterValue.toLowerCase())
-            );
-        }
-
-        if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-            filteredUsers = filteredUsers.filter((user) =>
-                Array.from(statusFilter).includes(user.isActive) ||
-                Array.from(statusFilter).includes(user.emailConfirmed)
-            );
-        }
-
-        return filteredUsers;
-    }, [users, filterValue, statusFilter]);
-
-    // const pages = Math.ceil(filteredItems.length / rowsPerPage);
-
-    const items = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-
-        return filteredItems.slice(start, end);
-    }, [page, filteredItems, rowsPerPage]);
-
+    /***
+     *sorting data
+     **/
     const sortedItems = React.useMemo(() => {
-        return [...items].sort((a: UserResponse, b: UserResponse) => {
+        return [...userList].sort((a: UserResponse, b: UserResponse) => {
             // @ts-ignore
             const first = a[sortDescriptor.column] as number;
             // @ts-ignore
@@ -132,29 +100,112 @@ export default function UsersMainSection() {
 
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
         });
-    }, [sortDescriptor, items]);
+    }, [sortDescriptor, userList]);
 
+    const getTopContent = React.useMemo(() => {
+        return (
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between gap-3 items-end">
+                    <Input
+                        isClearable
+                        className="w-full sm:max-w-[44%]"
+                        placeholder="Search by name..."
+                        startContent={<SearchIcon/>}
+                        // value={filterValue}
+                        // onClear={() => onClear()}
+                        // onValueChange={onSearchChange}
+                    />
+                    <div className="flex gap-3">
+                        {/*TODO add filtering using status*/}
+                        <Dropdown>
+                            <DropdownTrigger className="hidden sm:flex">
+                                <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
+                                    Columns
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                disallowEmptySelection
+                                aria-label="Table Columns"
+                                closeOnSelect={false}
+                                selectedKeys={visibleColumns}
+                                selectionMode="multiple"
+                                onSelectionChange={setVisibleColumns}>
+                                {userTableColumns.map((column) => (
+                                    <DropdownItem key={column.uid} className="capitalize">
+                                        {capitalize(column.name)}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
+                        <Button color="primary" endContent={<PlusIcon/>}>
+                            Add New
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }, [
+        statusFilter,
+        visibleColumns,
+    ]);
+
+    function getBottomContent() {
+        return totalPages > 0 ? (
+            <div className="py-2 px-2 flex justify-between items-center">
+                <p className="text-small justify-items-start text-default-500">Page {currentPage} of {totalPages}</p>
+                <Pagination
+                    loop
+                    showControls
+                    showShadow
+                    className="text-white bg-gradient-to-br from-indigo-500 to-pink-500 font-bold"
+                    color="warning"
+                    radius="full"
+                    page={currentPage}
+                    total={totalPages}
+                    onChange={(page) => setCurrentPage(page)}
+                />
+                <div className="hidden sm:flex w-[30%] justify-end gap-2">
+                    <Button
+                        isDisabled={totalPages === 1}
+                        onPress={() => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev))}
+                        color="warning"
+                        className="text-black-2 bg-meta-6"
+                        size="sm"
+                        variant="flat">
+                        Previous
+                    </Button>
+                    <Button
+                        isDisabled={totalPages === 1}
+                        onPress={() => setCurrentPage((prev) => (prev < 10 ? prev + 1 : prev))}
+                        size="sm"
+                        className="text-black-2 bg-meta-6"
+                        color="warning"
+                        variant="flat">
+                        Next
+                    </Button>
+                </div>
+            </div>
+        ) : null;
+    }
+
+    /**
+     * custom cell rendering
+     */
     const renderCell = React.useCallback((user: UserResponse, columnKey: React.Key) => {
         // @ts-ignore
         const cellValue = user[columnKey];
-
         switch (columnKey) {
             case "email":
                 return (
-                    <User
-                        // avatarProps={{radius: "lg", src: user.avatar}}
-                        // description={user.createdOn.toString()}
-                        name={cellValue}
-                    >
-                        <p className="text-black-2">{user.email}</p>
-                    </User>
+                    <div className="flex flex-col">
+                        <p className="text-bold text-tiny capitalize text-black-2">{user.email}</p>
+                    </div>
                 );
             case "name":
                 return (
-                    <div className="flex flex-col">
-                        <p className="text-bold text-small capitalize">{cellValue}</p>
-                        <p className="text-bold text-tiny capitalize text-black-2">{user.firstName} {user.lastName}</p>
-                    </div>
+                    <User
+                        name={user.firstName + ' ' + user.lastName}
+                    />
                 );
             case "status":
                 return (
@@ -190,198 +241,33 @@ export default function UsersMainSection() {
         }
     }, []);
 
-    const onNextPage = React.useCallback(() => {
-        if (page < pages) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-
-            // Update the query parameters and make API call
-            queryParams.pageNumber = nextPage;
-            console.log("next page params",queryParams)
-            fetchData(queryParams);
-        }
-    }, [page, pages,fetchData, queryParams]);
-
-    const onPreviousPage = React.useCallback(() => {
-        if (page > 1) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-
-            // Update the query parameters and make API call
-            queryParams.pageNumber = nextPage;
-            fetchData(queryParams);
-        }
-    }, [page,fetchData, queryParams]);
-
-    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setRowsPerPage(Number(e.target.value));
-        setPage(1);
-    }, []);
-
-    const onSearchChange = React.useCallback((value?: string) => {
-        if (value) {
-            setFilterValue(value);
-            setPage(1);
-        } else {
-            setFilterValue("");
-        }
-    }, []);
-
-    const onClear = React.useCallback(() => {
-        setFilterValue("")
-        setPage(1)
-    }, [])
-
-    const topContent = React.useMemo(() => {
-        return (
-            <div className="flex flex-col gap-4">
-                <div className="flex justify-between gap-3 items-end">
-                    <Input
-                        isClearable
-                        className="w-full sm:max-w-[44%]"
-                        placeholder="Search by name..."
-                        startContent={<SearchIcon/>}
-                        value={filterValue}
-                        onClear={() => onClear()}
-                        onValueChange={onSearchChange}
-                    />
-                    <div className="flex gap-3">
-                        <Dropdown>
-                            <DropdownTrigger className="hidden sm:flex">
-                                <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
-                                    Status
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu
-                                disallowEmptySelection
-                                aria-label="Table Columns"
-                                closeOnSelect={false}
-                                selectedKeys={statusFilter}
-                                selectionMode="multiple"
-                                onSelectionChange={setStatusFilter}
-                            >
-                                {statusOptions.map((status) => (
-                                    <DropdownItem key={status.uid} className="capitalize">
-                                        {capitalize(status.name)}
-                                    </DropdownItem>
-                                ))}
-                            </DropdownMenu>
-                        </Dropdown>
-                        <Dropdown>
-                            <DropdownTrigger className="hidden sm:flex">
-                                <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
-                                    Columns
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu
-                                disallowEmptySelection
-                                aria-label="Table Columns"
-                                closeOnSelect={false}
-                                selectedKeys={visibleColumns}
-                                selectionMode="multiple"
-                                onSelectionChange={setVisibleColumns}
-                            >
-                                {userTableColumns.map((column) => (
-                                    <DropdownItem key={column.uid} className="capitalize">
-                                        {capitalize(column.name)}
-                                    </DropdownItem>
-                                ))}
-                            </DropdownMenu>
-                        </Dropdown>
-                        <Button color="primary" endContent={<PlusIcon/>}>
-                            Add New
-                        </Button>
-                    </div>
-                </div>
-                <div className="flex justify-between items-center">
-                    <span className="text-default-400 text-small">Total {users.length} users</span>
-                    <label className="flex items-center text-default-400 text-small">
-                        Rows per page:
-                        <select
-                            className="bg-transparent outline-none text-default-400 text-small"
-                            onChange={onRowsPerPageChange}
-                        >
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                        </select>
-                    </label>
-                </div>
-            </div>
-        );
-    }, [
-        filterValue,
-        statusFilter,
-        visibleColumns,
-        onSearchChange,
-        onRowsPerPageChange,
-        users.length,
-        hasSearchFilter,
-    ]);
-
-    const bottomContent = React.useMemo(() => {
-        return (
-            <div className="py-2 px-2 flex justify-between items-center">
-                <span className="w-[30%] text-small text-default-400">
-                  {selectedKeys === "all"
-                      ? "All items selected"
-                      : `${selectedKeys.size} of ${filteredItems.length} selected`}
-                </span>
-                <Pagination
-                    isCompact
-                    showControls
-                    showShadow
-                    color="primary"
-                    page={page}
-                    total={pages}
-                    onChange={setPage}
-                />
-                <div className="hidden sm:flex w-[30%] justify-end gap-2">
-                    <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
-                        Previous
-                    </Button>
-                    <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onNextPage}>
-                        Next
-                    </Button>
-                </div>
-            </div>
-        );
-    }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
-
     return (
         <Table
-            aria-label="Example table with custom cells, pagination and sorting"
-            isHeaderSticky
-            bottomContent={bottomContent}
-            bottomContentPlacement="outside"
-            classNames={{
-                wrapper: "max-h-[382px]",
-            }}
-            selectedKeys={selectedKeys}
-            selectionMode="multiple"
+            aria-label="Pagination"
             sortDescriptor={sortDescriptor}
-            topContent={topContent}
-            topContentPlacement="outside"
-            onSelectionChange={setSelectedKeys}
             onSortChange={setSortDescriptor}
-        >
+            topContent={getTopContent}
+            topContentPlacement="outside"
+            bottomContent={getBottomContent()}>
             <TableHeader columns={headerColumns}>
                 {(column) => (
                     <TableColumn
                         key={column.uid}
                         align={column.uid === "actions" ? "center" : "start"}
-                        allowsSorting={column.sortable}
-                    >
+                        allowsSorting={column.sortable}>
                         {column.name}
                     </TableColumn>
                 )}
             </TableHeader>
-            <TableBody emptyContent={"No users found"} items={sortedItems}>
-                {(item) => (
-                    <TableRow key={item.id}>
+            <TableBody
+                items={sortedItems}
+                loadingContent={<Spinner/>}
+                loadingState={isLoading ? "loading" : "idle"}>
+                {(user: UserResponse) => (
+                    <TableRow key={user.id}>
                         {(columnKey) =>
                             <TableCell>
-                                {renderCell(item, columnKey)}
+                                {renderCell(user, columnKey)}
                             </TableCell>
                         }
                     </TableRow>
