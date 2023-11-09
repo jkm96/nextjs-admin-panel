@@ -7,7 +7,17 @@ import {
     TableRow,
     TableCell,
     Pagination,
-    Spinner, Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, SortDescriptor, Selection,
+    Spinner,
+    Button,
+    Input,
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem,
+    SortDescriptor,
+    Selection,
+    User,
+    Chip, ChipProps,
 } from "@nextui-org/react";
 import {getUsers} from "@/lib/users/userService";
 import {UserResponse} from "@/boundary/interfaces/user";
@@ -16,6 +26,7 @@ import {SearchIcon} from "@/components/shared/icons/SearchIcon";
 import {ChevronDownIcon} from "@/components/shared/icons/ChevronDownIcon";
 import {capitalize, statusOptions, userTableColumns} from "@/lib/utils/tableUtils";
 import {PlusIcon} from "@/components/shared/icons/PlusIcon";
+import {VerticalDotsIcon} from "@/components/shared/icons/VerticalDotsIcon";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "email", "status", "actions"];
 export default function App() {
@@ -27,10 +38,24 @@ export default function App() {
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
     const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-        column: "email",
+        column: "name",
         direction: "ascending",
     });
+    const statusColorMap: Record<string, ChipProps["color"]> = {
+        active: "success",
+        inactive: "danger",
+        confirmed: "success",
+        unconfirmed: "warning",
+    };
+    const headerColumns = React.useMemo(() => {
+        if (visibleColumns === "all") return userTableColumns;
+        return userTableColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    }, [visibleColumns]);
 
+    /**
+     * fetch user data from api
+     * @param queryParams
+     */
     const fetchUsers = (queryParams: UserQueryParameters) => {
         getUsers(queryParams)
             .then((response) => {
@@ -59,6 +84,9 @@ export default function App() {
         fetchUsers(queryParams);
     }, [page]);
 
+    /***
+     *sorting data
+     **/
     const sortedItems = React.useMemo(() => {
         return [...userList].sort((a: UserResponse, b: UserResponse) => {
             // @ts-ignore
@@ -75,37 +103,17 @@ export default function App() {
         return (
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between gap-3 items-end">
-                    {/*<Input*/}
-                    {/*    isClearable*/}
-                    {/*    className="w-full sm:max-w-[44%]"*/}
-                    {/*    placeholder="Search by name..."*/}
-                    {/*    startContent={<SearchIcon/>}*/}
-                    {/*    value={filterValue}*/}
-                    {/*    onClear={() => onClear()}*/}
-                    {/*    onValueChange={onSearchChange}*/}
-                    {/*/>*/}
+                    <Input
+                        isClearable
+                        className="w-full sm:max-w-[44%]"
+                        placeholder="Search by name..."
+                        startContent={<SearchIcon/>}
+                        // value={filterValue}
+                        // onClear={() => onClear()}
+                        // onValueChange={onSearchChange}
+                    />
                     <div className="flex gap-3">
-                        <Dropdown>
-                            <DropdownTrigger className="hidden sm:flex">
-                                <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
-                                    Status
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu
-                                disallowEmptySelection
-                                aria-label="Table Columns"
-                                closeOnSelect={false}
-                                selectedKeys={statusFilter}
-                                selectionMode="multiple"
-                                onSelectionChange={setStatusFilter}
-                            >
-                                {statusOptions.map((status) => (
-                                    <DropdownItem key={status.uid} className="capitalize">
-                                        {capitalize(status.name)}
-                                    </DropdownItem>
-                                ))}
-                            </DropdownMenu>
-                        </Dropdown>
+                        {/*TODO add filtering using status*/}
                         <Dropdown>
                             <DropdownTrigger className="hidden sm:flex">
                                 <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
@@ -118,8 +126,7 @@ export default function App() {
                                 closeOnSelect={false}
                                 selectedKeys={visibleColumns}
                                 selectionMode="multiple"
-                                onSelectionChange={setVisibleColumns}
-                            >
+                                onSelectionChange={setVisibleColumns}>
                                 {userTableColumns.map((column) => (
                                     <DropdownItem key={column.uid} className="capitalize">
                                         {capitalize(column.name)}
@@ -135,17 +142,11 @@ export default function App() {
             </div>
         );
     }, [
-        // filterValue,
         statusFilter,
         visibleColumns,
-        // onSearchChange,
-        // onRowsPerPageChange,
-        // users.length,
-        // hasSearchFilter,
     ]);
 
-
-    const getBottomContent = React.useMemo(() => {
+    function getBottomContent() {
         return totalPages > 0 ? (
             <div className="flex w-full justify-center">
                 <Pagination
@@ -159,32 +160,95 @@ export default function App() {
                 />
             </div>
         ) : null;
+    }
+
+    /**
+     * custom cell rendering
+     */
+    const renderCell = React.useCallback((user: UserResponse, columnKey: React.Key) => {
+        // @ts-ignore
+        const cellValue = user[columnKey];
+        switch (columnKey) {
+            case "email":
+                return (
+                    <User
+                        // avatarProps={{radius: "lg", src: user.avatar}}
+                        // description={user.createdOn.toString()}
+                        name={cellValue}
+                    >
+                        <p className="text-black-2">{user.email}</p>
+                    </User>
+                );
+            case "name":
+                return (
+                    <div className="flex flex-col">
+                        <p className="text-bold text-small capitalize">{cellValue}</p>
+                        <p className="text-bold text-tiny capitalize text-black-2">{user.firstName} {user.lastName}</p>
+                    </div>
+                );
+            case "status":
+                return (
+                    <Chip className="capitalize" color={statusColorMap[user.isActive]} size="sm" variant="flat">
+                        {user.isActive}
+                    </Chip>
+                );
+            case "emailConfirmed":
+                return (
+                    <Chip className="capitalize" color={statusColorMap[user.emailConfirmed]} size="sm" variant="flat">
+                        {user.emailConfirmed}
+                    </Chip>
+                );
+            case "actions":
+                return (
+                    <div className="relative flex justify-center items-center gap-2">
+                        <Dropdown>
+                            <DropdownTrigger>
+                                <Button isIconOnly size="sm" variant="light">
+                                    <VerticalDotsIcon className="text-default-300"/>
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu>
+                                <DropdownItem>View</DropdownItem>
+                                <DropdownItem>Edit</DropdownItem>
+                                <DropdownItem>Delete</DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                    </div>
+                );
+            default:
+                return cellValue;
+        }
     }, []);
 
     return (
         <Table
             aria-label="Pagination"
-            bottomContent={getBottomContent}
+            sortDescriptor={sortDescriptor}
+            onSortChange={setSortDescriptor}
             topContent={getTopContent}
             topContentPlacement="outside"
-        >
-            <TableHeader>
-                <TableColumn key="name">Name</TableColumn>
-                <TableColumn key="email">Email</TableColumn>
-                <TableColumn key="status">Status</TableColumn>
-                <TableColumn key="emailConfirmed">Email Confirmed</TableColumn>
+            bottomContent={getBottomContent()}>
+            <TableHeader columns={headerColumns}>
+                {(column) => (
+                    <TableColumn
+                        key={column.uid}
+                        align={column.uid === "actions" ? "center" : "start"}
+                        allowsSorting={column.sortable}>
+                        {column.name}
+                    </TableColumn>
+                )}
             </TableHeader>
             <TableBody
-                items={userList}
+                items={sortedItems}
                 loadingContent={<Spinner/>}
-                loadingState={isLoading ? "loading" : "idle"}
-            >
+                loadingState={isLoading ? "loading" : "idle"}>
                 {(user: UserResponse) => (
                     <TableRow key={user.id}>
-                        <TableCell>{user.firstName} {user.lastName}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.isActive}</TableCell>
-                        <TableCell>{user.emailConfirmed}</TableCell>
+                        {(columnKey) =>
+                            <TableCell>
+                                {renderCell(user, columnKey)}
+                            </TableCell>
+                        }
                     </TableRow>
                 )}
             </TableBody>
