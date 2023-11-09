@@ -46,6 +46,7 @@ export default function UsersMainSection() {
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
     const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [pages, setTotalPages] = React.useState(10);
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
         column: "email",
         direction: "ascending",
@@ -61,13 +62,18 @@ export default function UsersMainSection() {
     }, [visibleColumns]);
 
     const queryParams: UserQueryParameters = new UserQueryParameters();
-    useEffect(() => {
+    const fetchData = (queryParams:UserQueryParameters) => {
         getUsers(queryParams)
             .then(response => {
                 if (response.statusCode === 200) {
+                    console.log("user data", response)
                     const parsedData: PagedResponse = response.data;
                     const {data, pagingMetaData} = parsedData;
                     console.log("paging Meta Data", pagingMetaData)
+                    setPage(pagingMetaData.currentPage);
+                    setRowsPerPage(pagingMetaData.pageSize);
+                    setTotalPages(pagingMetaData.totalPages)
+
                     const usersList: UserResponse[] = data;
                     setUserList(usersList);
                 }
@@ -75,7 +81,15 @@ export default function UsersMainSection() {
             .catch(error => {
                 toast.error(`Error fetching users ${error}`);
             });
+    }
+
+    useEffect(() => {
+        fetchData(queryParams);
     }, []);
+
+    useEffect(() => {
+        console.log("Users state updated:", users);
+    }, [users]);
 
     const filteredItems = React.useMemo(() => {
         let filteredUsers = [...users];
@@ -99,7 +113,7 @@ export default function UsersMainSection() {
         return filteredUsers;
     }, [users, filterValue, statusFilter]);
 
-    const pages = Math.ceil(filteredItems.length / rowsPerPage);
+    // const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -178,15 +192,26 @@ export default function UsersMainSection() {
 
     const onNextPage = React.useCallback(() => {
         if (page < pages) {
-            setPage(page + 1);
+            const nextPage = page + 1;
+            setPage(nextPage);
+
+            // Update the query parameters and make API call
+            queryParams.pageNumber = nextPage;
+            console.log("next page params",queryParams)
+            fetchData(queryParams);
         }
-    }, [page, pages]);
+    }, [page, pages,fetchData, queryParams]);
 
     const onPreviousPage = React.useCallback(() => {
         if (page > 1) {
-            setPage(page - 1);
+            const nextPage = page + 1;
+            setPage(nextPage);
+
+            // Update the query parameters and make API call
+            queryParams.pageNumber = nextPage;
+            fetchData(queryParams);
         }
-    }, [page]);
+    }, [page,fetchData, queryParams]);
 
     const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(Number(e.target.value));

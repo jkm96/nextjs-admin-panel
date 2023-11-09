@@ -23,5 +23,5 @@ function DashboardPage() {
         </>
     )
 }
-const viewPermission = MapPermission(AdminPortalPermission.PermissionsUsersCreate)
+const viewPermission = MapPermission(AdminPortalPermission.PermissionsAccessAll)
 export default AuthorizeComponent( [viewPermission])(DashboardPage);
