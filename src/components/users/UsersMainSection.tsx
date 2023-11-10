@@ -6,40 +6,30 @@ import {
     TableBody,
     TableRow,
     TableCell,
-    Pagination,
     Spinner,
-    Button,
-    Input,
-    Dropdown,
-    DropdownTrigger,
-    DropdownMenu,
-    DropdownItem,
     SortDescriptor,
     Selection,
-    User,
-    Chip, ChipProps,
+    ChipProps, Button,
 } from "@nextui-org/react";
 import {getUsers} from "@/lib/users/userService";
 import {UserResponse} from "@/boundary/interfaces/user";
 import {UserQueryParameters} from "@/boundary/parameters/userQueryParameters";
-import {SearchIcon} from "@/components/shared/icons/SearchIcon";
-import {ChevronDownIcon} from "@/components/shared/icons/ChevronDownIcon";
-import {capitalize, statusOptions, userTableColumns} from "@/lib/utils/tableUtils";
-import {PlusIcon} from "@/components/shared/icons/PlusIcon";
-import {VerticalDotsIcon} from "@/components/shared/icons/VerticalDotsIcon";
-import {toast} from "react-toastify";
-import isActive = toast.isActive;
-import {className} from "postcss-selector-parser";
+import {userTableColumns} from "@/lib/utils/tableUtils";
+import PaginationComponent from "@/components/common/pagination/PaginationComponent";
+import RenderUserCell from "@/components/users/RenderUserCell";
+import SearchComponent from "@/components/common/search/SearchComponent";
+import {UserVisibleColumns} from "@/components/users/UserVisibleColumns";
+import CreateUserModal from "@/components/users/modals/CreateUserModal";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "email", "status", "actions"];
-export default function UsersMainSection() {
+
+export default function UsersMainSection({query}: { query: string; }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
     const [userList, setUserList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
-    const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
         column: "name",
         direction: "ascending",
@@ -65,7 +55,6 @@ export default function UsersMainSection() {
                 if (response.statusCode === 200) {
                     const parsedData = response.data;
                     const {data, pagingMetaData} = parsedData;
-                    console.log("paging metadata", pagingMetaData)
                     setCurrentPage(pagingMetaData.currentPage);
                     setRowsPerPage(pagingMetaData.pageSize);
                     setTotalPages(pagingMetaData.totalPages);
@@ -84,8 +73,9 @@ export default function UsersMainSection() {
         setIsLoading(true);
         const queryParams: UserQueryParameters = new UserQueryParameters();
         queryParams.pageNumber = currentPage;
+        queryParams.searchTerm = query;
         fetchUsers(queryParams);
-    }, [currentPage]);
+    }, [currentPage, query]);
 
     /***
      *sorting data
@@ -102,177 +92,69 @@ export default function UsersMainSection() {
         });
     }, [sortDescriptor, userList]);
 
-    const getTopContent = React.useMemo(() => {
-        return (
-            <div className="flex flex-col gap-4">
-                <div className="flex justify-between gap-3 items-end">
-                    <Input
-                        isClearable
-                        className="w-full sm:max-w-[44%]"
-                        placeholder="Search by name..."
-                        startContent={<SearchIcon/>}
-                        // value={filterValue}
-                        // onClear={() => onClear()}
-                        // onValueChange={onSearchChange}
-                    />
-                    <div className="flex gap-3">
-                        {/*TODO add filtering using status*/}
-                        <Dropdown>
-                            <DropdownTrigger className="hidden sm:flex">
-                                <Button endContent={<ChevronDownIcon className="text-small"/>} variant="flat">
-                                    Columns
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu
-                                disallowEmptySelection
-                                aria-label="Table Columns"
-                                closeOnSelect={false}
-                                selectedKeys={visibleColumns}
-                                selectionMode="multiple"
-                                onSelectionChange={setVisibleColumns}>
-                                {userTableColumns.map((column) => (
-                                    <DropdownItem key={column.uid} className="capitalize">
-                                        {capitalize(column.name)}
-                                    </DropdownItem>
-                                ))}
-                            </DropdownMenu>
-                        </Dropdown>
-                        <Button color="primary" endContent={<PlusIcon/>}>
-                            Add New
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        );
-    }, [
-        statusFilter,
-        visibleColumns,
-    ]);
+    /**
+     * user table visible columns e.g. search
+     */
+    const getUserVisibleColumns = React.useMemo(() => {
+        return UserVisibleColumns(visibleColumns, setVisibleColumns);
+    }, [visibleColumns]);
 
+    /**
+     * user table pagination
+     */
     function getBottomContent() {
-        return totalPages > 0 ? (
-            <div className="py-2 px-2 flex justify-between items-center">
-                <p className="text-small justify-items-start text-default-500">Page {currentPage} of {totalPages}</p>
-                <Pagination
-                    loop
-                    showControls
-                    showShadow
-                    className="text-white bg-gradient-to-br from-indigo-500 to-pink-500 font-bold"
-                    color="warning"
-                    radius="full"
-                    page={currentPage}
-                    total={totalPages}
-                    onChange={(page) => setCurrentPage(page)}
-                />
-                <div className="hidden sm:flex w-[30%] justify-end gap-2">
-                    <Button
-                        isDisabled={totalPages === 1}
-                        onPress={() => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev))}
-                        color="warning"
-                        className="text-black-2 bg-meta-6"
-                        size="sm"
-                        variant="flat">
-                        Previous
-                    </Button>
-                    <Button
-                        isDisabled={totalPages === 1}
-                        onPress={() => setCurrentPage((prev) => (prev < 10 ? prev + 1 : prev))}
-                        size="sm"
-                        className="text-black-2 bg-meta-6"
-                        color="warning"
-                        variant="flat">
-                        Next
-                    </Button>
-                </div>
-            </div>
-        ) : null;
+        return PaginationComponent(totalPages, currentPage, setCurrentPage);
     }
 
     /**
      * custom cell rendering
      */
     const renderCell = React.useCallback((user: UserResponse, columnKey: React.Key) => {
-        // @ts-ignore
-        const cellValue = user[columnKey];
-        switch (columnKey) {
-            case "email":
-                return (
-                    <div className="flex flex-col">
-                        <p className="text-bold text-tiny capitalize text-black-2">{user.email}</p>
-                    </div>
-                );
-            case "name":
-                return (
-                    <User
-                        name={user.firstName + ' ' + user.lastName}
-                    />
-                );
-            case "status":
-                return (
-                    <Chip className="capitalize" color={statusColorMap[user.isActive]} size="sm" variant="flat">
-                        {user.isActive}
-                    </Chip>
-                );
-            case "emailConfirmed":
-                return (
-                    <Chip className="capitalize" color={statusColorMap[user.emailConfirmed]} size="sm" variant="flat">
-                        {user.emailConfirmed}
-                    </Chip>
-                );
-            case "actions":
-                return (
-                    <div className="relative flex justify-center items-center gap-2">
-                        <Dropdown>
-                            <DropdownTrigger>
-                                <Button isIconOnly size="sm" variant="light">
-                                    <VerticalDotsIcon className="text-default-300"/>
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu>
-                                <DropdownItem>View</DropdownItem>
-                                <DropdownItem>Edit</DropdownItem>
-                                <DropdownItem>Delete</DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
-                    </div>
-                );
-            default:
-                return cellValue;
-        }
+        return RenderUserCell(user, columnKey, statusColorMap);
     }, []);
 
     return (
-        <Table
-            aria-label="Pagination"
-            sortDescriptor={sortDescriptor}
-            onSortChange={setSortDescriptor}
-            topContent={getTopContent}
-            topContentPlacement="outside"
-            bottomContent={getBottomContent()}>
-            <TableHeader columns={headerColumns}>
-                {(column) => (
-                    <TableColumn
-                        key={column.uid}
-                        align={column.uid === "actions" ? "center" : "start"}
-                        allowsSorting={column.sortable}>
-                        {column.name}
-                    </TableColumn>
-                )}
-            </TableHeader>
-            <TableBody
-                items={sortedItems}
-                loadingContent={<Spinner/>}
-                loadingState={isLoading ? "loading" : "idle"}>
-                {(user: UserResponse) => (
-                    <TableRow key={user.id}>
-                        {(columnKey) =>
-                            <TableCell>
-                                {renderCell(user, columnKey)}
-                            </TableCell>
-                        }
-                    </TableRow>
-                )}
-            </TableBody>
-        </Table>
+        <>
+            <div className="flex flex-col gap-4 mb-2">
+                <div className="flex justify-between gap-3 items-end">
+                    <SearchComponent placeholder="Search for users"/>
+                    <div className="flex gap-3">
+                        {getUserVisibleColumns}
+                        <CreateUserModal/>
+                    </div>
+                </div>
+            </div>
+            <Table
+                aria-label="Pagination"
+                sortDescriptor={sortDescriptor}
+                onSortChange={setSortDescriptor}
+                topContentPlacement="outside"
+                bottomContent={getBottomContent()}>
+                <TableHeader columns={headerColumns}>
+                    {(column) => (
+                        <TableColumn
+                            key={column.uid}
+                            align={column.uid === "actions" ? "center" : "start"}
+                            allowsSorting={column.sortable}>
+                            {column.name}
+                        </TableColumn>
+                    )}
+                </TableHeader>
+                <TableBody
+                    items={sortedItems}
+                    loadingContent={<Spinner/>}
+                    loadingState={isLoading ? "loading" : "idle"}>
+                    {(user: UserResponse) => (
+                        <TableRow key={user.id}>
+                            {(columnKey) =>
+                                <TableCell>
+                                    {renderCell(user, columnKey)}
+                                </TableCell>
+                            }
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+        </>
     );
 }

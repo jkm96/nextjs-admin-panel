@@ -10,7 +10,6 @@ export async function hasRequiredPermissions(requiredPermissions: string[]): Pro
         const {accessToken} = tokenResponse;
         const permissionString = getUserPackedPermissions(accessToken);
         const userPermissions = unpackPermissionsFromString(permissionString);
-        console.log("user permissions", userPermissions)
         const trimmedUserPermissions = userPermissions.map(permission => permission.trim());
 
         const alwaysTruePermission = MapPermission(AdminPortalPermission.PermissionsAccessAll)

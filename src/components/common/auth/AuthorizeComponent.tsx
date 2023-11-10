@@ -13,7 +13,6 @@ const AuthorizeComponent = (requiredPermissions:any) => (WrappedComponent:any) =
             const checkPermissions = async () => {
                 try {
                     const permissionStatus = await hasRequiredPermissions(requiredPermissions);
-                    console.log("permissions Status", permissionStatus)
                     setHasPermission(permissionStatus);
                 } catch (error) {
                     console.error("Permission check failed:", error);
