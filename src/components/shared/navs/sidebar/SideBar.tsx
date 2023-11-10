@@ -145,7 +145,7 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                         {/* <!-- Menu Item Dashboard --> */}
 
 
-                        {/* <!-- Menu Item Forms --> */}
+                        {/* <!-- Menu Item Account Mngt --> */}
                         <SidebarLinkGroup
                             activeCondition={
                                 pathname === "/dashboard/users" || pathname.includes("users")
@@ -206,7 +206,7 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                                 );
                             }}
                         </SidebarLinkGroup>
-                        {/* <!-- Menu Item Forms --> */}
+                        {/* <!-- Menu Item Account Mngt --> */}
 
                         {/* <!-- Menu Item Profile --> */}
                         <li>

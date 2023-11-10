@@ -1,6 +1,6 @@
 import {useAuth} from "@/hooks/useAuth";
 import {useRouter} from "next/navigation";
-import {deleteAccessToken} from "@/lib/token/tokenService";
+import {deleteAccessToken} from "@/lib/services/token/tokenService";
 import LogoutIcon from "@/components/shared/icons/LogoutIcon";
 
 export default function LogoutForm() {

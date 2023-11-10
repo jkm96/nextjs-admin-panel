@@ -20,8 +20,7 @@ export default function PaginationComponent(totalPages: number, currentPage: num
                 <Button
                     isDisabled={totalPages === 1}
                     onPress={() => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev))}
-                    color="warning"
-                    className="text-black-2 bg-meta-6"
+                    className="text-black-2 bg-meta-6 font-bold"
                     size="sm"
                     variant="flat">
                     Previous
@@ -30,8 +29,7 @@ export default function PaginationComponent(totalPages: number, currentPage: num
                     isDisabled={totalPages === 1}
                     onPress={() => setCurrentPage((prev) => (prev < 10 ? prev + 1 : prev))}
                     size="sm"
-                    className="text-black-2 bg-meta-6"
-                    color="warning"
+                    className="text-black-2 bg-meta-6 font-bold"
                     variant="flat">
                     Next
                 </Button>

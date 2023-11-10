@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
         const pageNumber = searchParams.get('pageNumber');
         const orderBy = searchParams.get('orderBy');
         const searchTerm = searchParams.get('searchTerm');
+        console.log("search params", searchParams)
         const config: AxiosRequestConfig = {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -27,8 +28,8 @@ export async function GET(request: NextRequest) {
             }
         };
 
-        const response = await adminApiClient.get('identity/user', config);
-        console.log("fetch user response", response.data);
+        const response = await adminApiClient.get('identity/role', config);
+        console.log("fetch role response", response.data);
         return handleAxiosResponse(response);
     } catch (error: unknown) {
         return handleApiException(error);

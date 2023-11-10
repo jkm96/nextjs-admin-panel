@@ -9,6 +9,14 @@ const userTableColumns = [
     {name: "ACTIONS", uid: "actions"},
 ];
 
+const roleTableColumns = [
+    {name: "ID", uid: "id", sortable: true},
+    {name: "NAME", uid: "name", sortable: true},
+    {name: "DESCRIPTION", uid: "description", sortable: true},
+    {name: "CREATED ON", uid: "CreatedOn", sortable: true},
+    {name: "ACTIONS", uid: "actions"},
+];
+
 const statusOptions = [
     {name: "Active", uid: "active"},
     {name: "InActive", uid: "inactive"},
@@ -16,7 +24,7 @@ const statusOptions = [
     {name: "UnConfirmed", uid: "unconfirmed"},
 ];
 
-export {userTableColumns,statusOptions};
+export {userTableColumns,roleTableColumns,statusOptions};
 
 export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);

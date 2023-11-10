@@ -1,5 +1,5 @@
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
-import {getAccessToken} from "@/lib/token/tokenService";
+import {getAccessToken} from "@/lib/services/token/tokenService";
 import {getUserPackedPermissions} from "@/lib/jwt/readAuthToken";
 
 export async function hasRequiredPermissions(requiredPermissions: string[]): Promise<boolean> {

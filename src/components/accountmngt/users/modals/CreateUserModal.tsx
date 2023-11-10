@@ -1,0 +1,302 @@
+import React, {useEffect, useState} from "react";
+import {
+    Button,
+    Input,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    Table, TableBody, TableCell, TableColumn,
+    getKeyValue,
+    useDisclosure, TableHeader, TableRow, Checkbox
+} from "@nextui-org/react";
+import {PlusIcon} from "@/components/shared/icons/PlusIcon";
+import PersonIcon from "@/components/shared/icons/PersonIcon";
+import {getRoles} from "@/lib/services/accountmngt/roleService";
+import {RoleQueryParameters} from "@/boundary/parameters/roleQueryParameters";
+import {RoleResponse} from "@/boundary/interfaces/role";
+import {validateCreateUserFormInputErrors} from "@/helpers/validationHelpers";
+import {CreateUserRequest, UserRoleModel} from "@/boundary/interfaces/user";
+import {MailIcon} from "@/components/shared/icons/MailIcon";
+import {toast} from "react-toastify";
+import {createStagingRecord} from "@/lib/services/staging/stagingRecordService";
+import {StagingRecordStatus, StagingUpsertRequest} from "@/boundary/interfaces/staging";
+import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
+import {useAuth} from "@/hooks/useAuth";
+
+const initialFormState: CreateUserRequest = {
+    email: "", lastName: "",
+    firstName: "", userName: "",
+    userRolesList: [],
+};
+export default function CreateUserModal() {
+    const {user} = useAuth();
+    const {isOpen, onOpen, onOpenChange,onClose} = useDisclosure();
+    const [roleList, setRoleList] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [backendError, setBackendError] = useState("");
+    const [createUserFormData, setCreateUserFormData] = useState<CreateUserRequest>(initialFormState);
+    const [inputErrors, setInputErrors] = useState({
+        email: "", lastName: "",
+        firstName: "", userName: ""
+    });
+
+    useEffect(() => {
+        if (isOpen) {
+            const queryParams = new RoleQueryParameters();
+            getRoles(queryParams)
+                .then((response) => {
+                    if (response.statusCode === 200) {
+                        const parsedData = response.data;
+                        const {data} = parsedData;
+                        // Map the fetched roles to UserRoleModel and set it in the userRolesList
+                        const mappedRoles = data.map((role: any) => ({
+                            roleName: role.name,
+                            roleId: role.id,
+                            roleDescription: role.description,
+                            selected: false, // You can set the default value for selected as needed
+                        }));
+
+                        setCreateUserFormData({
+                            ...createUserFormData,
+                            userRolesList: mappedRoles,
+                        });
+                        setRoleList(data)
+                    }
+                })
+                .catch((error) => {
+                    console.error(`Error fetching roles: ${error}`);
+                });
+        }
+    }, [isOpen]);
+
+    const handleChange = (e: any) => {
+        const {name, value} = e.target;
+        setCreateUserFormData({...createUserFormData, [name]: value});
+    }
+
+    const handleRoleCheckboxChange = (roleName: string, checked: boolean) => {
+        const updatedRoles = createUserFormData.userRolesList.map((role) =>
+            role.roleName === roleName ? {...role, selected: checked} : role
+        );
+
+        setCreateUserFormData({
+            ...createUserFormData,
+            userRolesList: updatedRoles,
+        });
+    };
+
+
+    const handleUserCreationSubmit = async (e: any) => {
+        e.preventDefault();
+        setBackendError("");
+        setIsSubmitting(true)
+
+        const inputErrors = validateCreateUserFormInputErrors(createUserFormData);
+        console.log("errors", inputErrors)
+        if (inputErrors && Object.keys(inputErrors).length > 0) {
+            setInputErrors(inputErrors);
+            setIsSubmitting(false)
+            return;
+        }
+
+        if (
+            createUserFormData.email.trim() === "" ||
+            createUserFormData.userName.trim() === "" ||
+            createUserFormData.firstName.trim() === "" ||
+            createUserFormData.lastName.trim() === ""
+        ) {
+            setIsSubmitting(false)
+            return;
+        }
+        // Check if at least one role is selected
+        if (!createUserFormData.userRolesList.some((role) => role.selected)) {
+            setIsSubmitting(false);
+            // Show an error message or handle the case where no role is selected
+            toast.error("Please select at least one role.");
+            return;
+        }
+
+        const stagingRequest: StagingUpsertRequest = {
+            id: 0,
+            entity: createUserFormData.email,
+            dataBefore: JSON.stringify(initialFormState),
+            dataAfter: JSON.stringify(createUserFormData),
+            creator: user?.email,
+            approverId: user?.id,
+            action: MapPermission(AdminPortalPermission.PermissionsUsersCreate),
+            status: StagingRecordStatus.Pending,
+            comments: "Request for data add"
+        };
+
+        let response = await createStagingRecord(stagingRequest);
+        console.log("create user response", response)
+        if (response.statusCode === 200) {
+            toast.success(response.message)
+            setIsSubmitting(false)
+            setCreateUserFormData(initialFormState)
+            onClose();
+        } else {
+            setIsSubmitting(false)
+            toast.error(response.message ?? "Unknown error occurred")
+            setBackendError(response.message ?? "Unknown error occurred");
+        }
+    };
+
+    const handleCloseModal = () => {
+        setCreateUserFormData(initialFormState);
+    };
+
+    return (
+        <>
+            <Button onPress={onOpen} color="primary" startContent={<PlusIcon/>}>
+                Add New
+            </Button>
+            <Modal
+                isOpen={isOpen}
+                onOpenChange={() => {
+                    onOpenChange();
+                    handleCloseModal();
+                }}
+                onClose={onClose}
+                placement="top-center"
+                size="4xl"
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Create User</ModalHeader>
+                            <ModalBody>
+                                <h3>User Details</h3>
+                                <form onSubmit={handleUserCreationSubmit}>
+                                    <div className="grid md:grid-cols-2 md:gap-6">
+                                        <Input type="email"
+                                               onChange={handleChange}
+                                               value={createUserFormData.email}
+                                               label="Email"
+                                               name="email"
+                                               variant={"bordered"}
+                                               placeholder="Enter your email"
+                                               endContent={
+                                                   <MailIcon
+                                                       className="fill-current"/>
+                                               }
+                                               onInput={() => {
+                                                   setInputErrors({...inputErrors, email: ""});
+                                               }}
+                                               isInvalid={inputErrors.email !== ""}
+                                               errorMessage={inputErrors.email}/>
+
+                                        <Input type="text"
+                                               onChange={handleChange}
+                                               value={createUserFormData.userName}
+                                               label="Username"
+                                               name="userName"
+                                               variant={"bordered"}
+                                               placeholder="Enter username"
+                                               endContent={
+                                                   <PersonIcon
+                                                       className="fill-current"/>
+                                               }
+                                               onInput={() => {
+                                                   setInputErrors({...inputErrors, userName: ""});
+                                               }}
+                                               isInvalid={inputErrors.userName !== ""}
+                                               errorMessage={inputErrors.userName}/>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 md:gap-6">
+                                        <Input type="text"
+                                               onChange={handleChange}
+                                               value={createUserFormData.firstName}
+                                               label="FirstName"
+                                               name="firstName"
+                                               endContent={
+                                                   <PersonIcon
+                                                       className="fill-current"/>
+                                               }
+                                               variant={"bordered"}
+                                               placeholder="Enter firstName"
+                                               onInput={() => {
+                                                   setInputErrors({...inputErrors, firstName: ""});
+                                               }}
+                                               isInvalid={inputErrors.firstName !== ""}
+                                               errorMessage={inputErrors.firstName}/>
+
+                                        <Input type="text"
+                                               onChange={handleChange}
+                                               value={createUserFormData.lastName}
+                                               label="Lastname"
+                                               name="lastName"
+                                               endContent={
+                                                   <PersonIcon
+                                                       className="fill-current"/>
+                                               }
+                                               variant={"bordered"}
+                                               placeholder="Enter lastName"
+                                               onInput={() => {
+                                                   setInputErrors({...inputErrors, lastName: ""});
+                                               }}
+                                               isInvalid={inputErrors.lastName !== ""}
+                                               errorMessage={inputErrors.lastName}/>
+                                    </div>
+
+                                    <h3>Roles</h3>
+                                    <Table aria-label="Example table with dynamic content"
+                                           classNames={{
+                                               base: "max-h-[320px] overflow-scroll",
+                                           }}
+                                    >
+                                        <TableHeader>
+                                            <TableColumn>Name</TableColumn>
+                                            <TableColumn>Description</TableColumn>
+                                            <TableColumn>Action</TableColumn>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {roleList.map((item: RoleResponse) => (
+                                                <TableRow key={item.id}>
+                                                    <TableCell>{item.name}</TableCell>
+                                                    <TableCell>{item.description}</TableCell>
+                                                    <TableCell>
+                                                        <Checkbox
+                                                            checked={
+                                                                createUserFormData.userRolesList.some(
+                                                                    (role) => role.roleName === item.name && role.selected
+                                                                )
+                                                            }
+                                                            onChange={(e) =>
+                                                                handleRoleCheckboxChange(item.name, e.target.checked)
+                                                            }
+                                                            color="success"
+                                                        >
+                                                            Add
+                                                        </Checkbox>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    <div className="flex justify-end mt-4 gap-1">
+                                        <Button color="danger" variant="flat" onPress={onClose}>
+                                            Close
+                                        </Button>
+                                        <Button color="primary"
+                                                type="submit"
+                                                onClick={handleUserCreationSubmit}
+                                        >
+                                            {isSubmitting ? "Submitting..." : "Create User"}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </ModalBody>
+                            <ModalFooter>
+
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+        </>
+    );
+}

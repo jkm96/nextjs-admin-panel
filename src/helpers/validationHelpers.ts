@@ -1,4 +1,5 @@
 import {LoginUserRequest, RegisterUserRequest} from "@/boundary/interfaces/auth";
+import {CreateUserRequest} from "@/boundary/interfaces/user";
 
 export function isEmailValid (email: string): boolean{
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -47,6 +48,46 @@ export function validateRegisterFormInputErrors(formData: RegisterUserRequest) {
     // Check if there are any errors and return null if all input is valid
     for (const key in errors) {
         if (errors[key as keyof RegisterUserRequest] !== "") {
+            return errors;
+        }
+    }
+
+    return null;
+}
+
+export function validateCreateUserFormInputErrors(createUserFormData: CreateUserRequest) {
+    const errors:CreateUserRequest = {
+        email: "",   lastName: "",
+        firstName: "", userName: ""
+    }
+
+    if (createUserFormData.email.trim() === "") {
+        errors.email = "Email cannot be empty";
+    } else if (!isEmailValid(createUserFormData.email.trim())) {
+        errors.email = "Invalid email address";
+    }
+
+    if (createUserFormData.firstName.trim() === "") {
+        errors.firstName = "FirstName cannot be empty";
+    } else if (createUserFormData.firstName.trim().length < 4) {
+        errors.firstName = "FirstName must be at least 4 characters long";
+    }
+
+    if (createUserFormData.lastName.trim() === "") {
+        errors.lastName = "LastName cannot be empty";
+    } else if (createUserFormData.lastName.trim().length < 4) {
+        errors.lastName = "LastName must be at least 4 characters long";
+    }
+
+    if (createUserFormData.userName.trim() === "") {
+        errors.userName = "userName cannot be empty";
+    } else if (createUserFormData.userName.trim().length < 4) {
+        errors.userName = "userName must be at least 4 characters long";
+    }
+
+    // Check if there are any errors and return null if all input is valid
+    for (const key in errors) {
+        if (errors[key as keyof CreateUserRequest] !== "") {
             return errors;
         }
     }

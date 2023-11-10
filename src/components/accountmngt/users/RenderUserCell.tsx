@@ -10,13 +10,13 @@ export default function RenderUserCell(user: UserResponse, columnKey: string | n
         case "email":
             return (
                 <div className="flex flex-col">
-                    <p className="text-bold text-tiny capitalize text-black-2">{user.email}</p>
+                    <p className="text-bold text-small capitalize">{cellValue}</p>
                 </div>
             );
         case "name":
             return (
                 <User
-                    className="text-black-2"
+                    className="text-bold text-small capitalize"
                     name={user.firstName + ' ' + user.lastName}
                 />
             );

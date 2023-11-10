@@ -11,15 +11,15 @@ import {
     Selection,
     ChipProps, Button,
 } from "@nextui-org/react";
-import {getUsers} from "@/lib/users/userService";
+import {getUsers} from "@/lib/services/accountmngt/userService";
 import {UserResponse} from "@/boundary/interfaces/user";
 import {UserQueryParameters} from "@/boundary/parameters/userQueryParameters";
 import {userTableColumns} from "@/lib/utils/tableUtils";
 import PaginationComponent from "@/components/common/pagination/PaginationComponent";
-import RenderUserCell from "@/components/users/RenderUserCell";
+import RenderUserCell from "@/components/accountmngt/users/RenderUserCell";
 import SearchComponent from "@/components/common/search/SearchComponent";
-import {UserVisibleColumns} from "@/components/users/UserVisibleColumns";
-import CreateUserModal from "@/components/users/modals/CreateUserModal";
+import {UserVisibleColumns} from "@/components/accountmngt/users/UserVisibleColumns";
+import CreateUserModal from "@/components/accountmngt/users/modals/CreateUserModal";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "email", "status", "actions"];
 

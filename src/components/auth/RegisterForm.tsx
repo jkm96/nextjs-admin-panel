@@ -5,8 +5,9 @@ import {RegisterUserRequest} from "@/boundary/interfaces/auth";
 import {validateRegisterFormInputErrors} from "@/helpers/validationHelpers";
 import {Input} from "@nextui-org/react";
 import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";
-import {registerUser} from "@/lib/auth/authService";
+import {registerUser} from "@/lib/services/auth/authService";
 import {Button} from "@nextui-org/button";
+import {toast} from "react-toastify";
 
 const initialFormState: RegisterUserRequest = {
     email: "",   lastName: "",
@@ -58,9 +59,11 @@ export default function RegisterForm() {
         if (response.statusCode === 200) {
             setIsSubmitting(false)
             setRegisterFormData(initialFormState)
+            toast.success("Registered in successfully")
             router.push('/auth/login')
         } else {
             setIsSubmitting(false)
+            toast.error(response.message ?? "Unknown error occurred")
             setBackendError(response.message ?? "Unknown error occurred");
         }
     };

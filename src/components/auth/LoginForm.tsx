@@ -5,7 +5,7 @@ import {useAuth} from "@/hooks/useAuth";
 import {useRouter} from "next/navigation";
 import {LoginUserRequest} from "@/boundary/interfaces/auth";
 import {TokenResponse} from "@/boundary/interfaces/token";
-import {loginUser} from "@/lib/auth/authService";
+import {loginUser} from "@/lib/services/auth/authService";
 import {Input} from "@nextui-org/react";
 import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";
 import {Button} from "@nextui-org/button";

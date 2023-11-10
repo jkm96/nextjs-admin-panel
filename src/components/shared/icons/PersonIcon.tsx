@@ -1,9 +1,9 @@
 import React from "react";
 
-export default function PersonIcon() {
+export default function PersonIcon(props:any) {
     return (
         <svg
-            className="fill-current"
+            {...props}
             width="22"
             height="22"
             viewBox="0 0 22 22"
