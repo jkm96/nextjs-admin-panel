@@ -34,7 +34,19 @@ export interface StagingResponse {
     status: StagingRecordStatus;
 }
 
-export enum AppModule {
+export enum AppModules {
     USERS = 'USERS',
     ROLES = 'ROLES',
 }
+
+const AppModulesDict = [
+    {
+        key: "users",
+        name: AppModules.USERS,
+    },
+    {
+        key: "roles",
+        name: AppModules.ROLES,
+    }
+];
+export {AppModulesDict}

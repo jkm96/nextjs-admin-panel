@@ -24,7 +24,7 @@ const stagingTableColumns = [
     {name: "ENTITY", uid: "entity", sortable: true},
     {name: "ACTION", uid: "action", sortable: true},
     {name: "CREATOR", uid: "creator", sortable: true},
-    {name: "CREATED ON", uid: "CreatedOn", sortable: true},
+    {name: "DATE CREATED", uid: "dateCreated", sortable: true},
     {name: "ACTIONS", uid: "actions"},
 ];
 

@@ -1,11 +1,11 @@
 import {RoleModuleActions, UserModuleActions} from "@/lib/utils/stagingUtils";
-import {AppModule} from "@/boundary/interfaces/staging";
+import {AppModules} from "@/boundary/interfaces/staging";
 
-const getActionsForModule = (module: AppModule) => {
+const getActionsForModule = (module:AppModules) => {
     switch (module) {
-        case AppModule.USERS:
+        case AppModules.USERS:
             return UserModuleActions;
-        case AppModule.ROLES:
+        case AppModules.ROLES:
             return RoleModuleActions;
         default:
             return [];
