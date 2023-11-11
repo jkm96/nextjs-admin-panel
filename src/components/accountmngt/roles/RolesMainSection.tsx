@@ -12,13 +12,12 @@ import {
 } from "@nextui-org/react";
 import {roleTableColumns} from "@/lib/utils/tableUtils";
 import PaginationComponent from "@/components/common/pagination/PaginationComponent";
-import SearchComponent from "@/components/common/search/SearchComponent";
-import CreateUserModal from "@/components/accountmngt/users/modals/CreateUserModal";
+import SearchComponent from "@/components/common/filter/SearchComponent";
 import {RoleQueryParameters} from "@/boundary/parameters/roleQueryParameters";
 import {RoleResponse} from "@/boundary/interfaces/role";
-import {RoleVisibleColumns} from "@/components/accountmngt/roles/RoleVisibleColumns";
 import RenderRoleCell from "@/components/accountmngt/roles/RenderRoleCell";
 import {getRoles} from "@/lib/services/accountmngt/roleService";
+import {TableVisibleColumns} from "@/components/common/filter/TableVisibleColumns";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "description", "actions"];
 
@@ -88,10 +87,14 @@ export default function RolesMainSection({query}: { query: string; }) {
     }, [sortDescriptor, roleList]);
 
     /**
-     * role table visible columns e.g. search
+     * role table visible columns e.g. filter
      */
     const getRoleVisibleColumns = React.useMemo(() => {
-        return RoleVisibleColumns(visibleColumns, setVisibleColumns);
+        return <TableVisibleColumns
+            visibleColumns={visibleColumns}
+            setVisibleColumns={setVisibleColumns}
+            tableColumns={roleTableColumns}
+        />
     }, [visibleColumns]);
 
     /**

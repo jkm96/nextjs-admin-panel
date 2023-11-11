@@ -14,12 +14,12 @@ import {
 import {getUsers} from "@/lib/services/accountmngt/userService";
 import {UserResponse} from "@/boundary/interfaces/user";
 import {UserQueryParameters} from "@/boundary/parameters/userQueryParameters";
-import {userTableColumns} from "@/lib/utils/tableUtils";
+import {roleTableColumns, userTableColumns} from "@/lib/utils/tableUtils";
 import PaginationComponent from "@/components/common/pagination/PaginationComponent";
 import RenderUserCell from "@/components/accountmngt/users/RenderUserCell";
-import SearchComponent from "@/components/common/search/SearchComponent";
-import {UserVisibleColumns} from "@/components/accountmngt/users/UserVisibleColumns";
+import SearchComponent from "@/components/common/filter/SearchComponent";
 import CreateUserModal from "@/components/accountmngt/users/modals/CreateUserModal";
+import {TableVisibleColumns} from "@/components/common/filter/TableVisibleColumns";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "email", "status", "actions"];
 
@@ -93,10 +93,14 @@ export default function UsersMainSection({query}: { query: string; }) {
     }, [sortDescriptor, userList]);
 
     /**
-     * user table visible columns e.g. search
+     * user table visible columns e.g. filter
      */
     const getUserVisibleColumns = React.useMemo(() => {
-        return UserVisibleColumns(visibleColumns, setVisibleColumns);
+        return <TableVisibleColumns
+            visibleColumns={visibleColumns}
+            setVisibleColumns={setVisibleColumns}
+            tableColumns={userTableColumns}
+        />
     }, [visibleColumns]);
 
     /**

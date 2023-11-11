@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
         const pageNumber = searchParams.get('pageNumber');
         const orderBy = searchParams.get('orderBy');
         const searchTerm = searchParams.get('searchTerm');
-        console.log("filter params", searchParams)
+        const action = searchParams.get('action');
+        const status = searchParams.get('status');
         const config: AxiosRequestConfig = {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -24,12 +25,14 @@ export async function GET(request: NextRequest) {
                 pageSize,
                 pageNumber,
                 orderBy,
-                searchTerm
+                searchTerm,
+                status,
+                action
             }
         };
 
-        const response = await adminApiClient.get('identity/role', config);
-        console.log("fetch role response", response.data);
+        const response = await adminApiClient.get('staging-records', config);
+        console.log("fetch staging response", response.data);
         return handleAxiosResponse(response);
     } catch (error: unknown) {
         return handleApiException(error);

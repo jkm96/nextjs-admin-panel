@@ -18,3 +18,23 @@ export interface StagingUpsertRequest {
     status: StagingRecordStatus;
     comments: string;
 }
+
+export interface StagingResponse {
+    id: number;
+    dateCreated: string;
+    dateApproved: string | null;
+    lastModifiedOn: string | null;
+    entity: string;
+    dataBefore: string;
+    dataAfter: string;
+    creator: string;
+    approver: string;
+    isActive: boolean;
+    action: string;
+    status: StagingRecordStatus;
+}
+
+export enum AppModule {
+    USERS = 'USERS',
+    ROLES = 'ROLES',
+}
