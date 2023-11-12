@@ -1,5 +1,3 @@
-import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
-
 const userTableColumns = [
     {name: "ID", uid: "id", sortable: true},
     {name: "NAME", uid: "name", sortable: true},
@@ -19,12 +17,15 @@ const roleTableColumns = [
     {name: "ACTIONS", uid: "actions"},
 ];
 
-const stagingTableColumns = [
+const auditTableColumns = [
     {name: "ID", uid: "id", sortable: true},
-    {name: "ENTITY", uid: "entity", sortable: true},
-    {name: "ACTION", uid: "action", sortable: true},
-    {name: "CREATOR", uid: "creator", sortable: true},
-    {name: "DATE CREATED", uid: "dateCreated", sortable: true},
+    {name: "MODULE", uid: "module", sortable: true},
+    {name: "AUDIT TYPE", uid: "auditType", sortable: true},
+    {name: "CREATOR NAME", uid: "creatorName", sortable: true},
+    {name: "CREATOR EMAIL", uid: "creatorEmail", sortable: true},
+    {name: "DESCRIPTION", uid: "description", sortable: true},
+    {name: "IP ADDRESS", uid: "ipAddress", sortable: true},
+    {name: "CREATED ON", uid: "createdOn", sortable: true},
     {name: "ACTIONS", uid: "actions"},
 ];
 
@@ -36,7 +37,7 @@ const statusOptions = [
     {name: "UnConfirmed", uid: "unconfirmed"},
 ];
 
-export {userTableColumns,roleTableColumns,stagingTableColumns,statusOptions};
+export {userTableColumns,roleTableColumns,auditTableColumns,statusOptions};
 
 export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);

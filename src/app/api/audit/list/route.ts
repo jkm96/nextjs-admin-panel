@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
         const pageNumber = searchParams.get('pageNumber');
         const orderBy = searchParams.get('orderBy');
         const searchTerm = searchParams.get('searchTerm');
-        const action = searchParams.get('action');
-        const status = searchParams.get('status');
+        const auditType = searchParams.get('auditType');
+        const module = searchParams.get('module');
         const config: AxiosRequestConfig = {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
                 pageNumber,
                 orderBy,
                 searchTerm,
-                status,
-                action
+                auditType,
+                module
             }
         };
 

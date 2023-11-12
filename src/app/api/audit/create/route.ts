@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         };
         const requestBody = await request.text();
         const response = await adminApiClient
-            .post('staging-records', `${requestBody}`,config);
+            .post('audit-trails', `${requestBody}`,config);
 
         return handleAxiosResponse(response);
     } catch (error: unknown) {

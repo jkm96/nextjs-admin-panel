@@ -68,7 +68,6 @@ const StagedRecords = ({query}: { query: string; }) => {
         queryParams.action = selectedActionValue;
         queryParams.status = StagingRecordStatus.Pending;
         queryParams.searchTerm = query;
-        console.log("queryParams", queryParams)
         fetchStagedRecords(queryParams);
     }, [currentPage, selectedModule, selectedAction, query]);
 
