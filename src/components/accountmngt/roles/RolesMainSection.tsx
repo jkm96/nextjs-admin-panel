@@ -118,7 +118,7 @@ export default function RolesMainSection({query}: { query: string; }) {
                     <SearchComponent placeholder="Search for roles"/>
                     <div className="flex gap-3">
                         {getRoleVisibleColumns}
-                        {/*<CreateUserModal/>*/}
+                        {/*<CreateRoleModal/>*/}
                     </div>
                 </div>
             </div>
@@ -139,6 +139,7 @@ export default function RolesMainSection({query}: { query: string; }) {
                     )}
                 </TableHeader>
                 <TableBody
+                    emptyContent={!isLoading && roleList.length === 0 ? "No data to display." : null}
                     items={sortedItems}
                     loadingContent={<Spinner/>}
                     loadingState={isLoading ? "loading" : "idle"}>

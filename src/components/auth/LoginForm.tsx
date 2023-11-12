@@ -55,7 +55,6 @@ export default function LoginForm() {
 
         let response = await loginUser(loginFormData);
         if (response.statusCode === 200) {
-            console.log("login response", response)
             toast.success("Logged in successfully")
             setIsSubmitting(false);
             setLoginFormData(initialFormState)
@@ -82,6 +81,7 @@ export default function LoginForm() {
                         <form onSubmit={handleLoginSubmit}>
                             <div className="flex flex-wrap md:flex-nowrap gap-4 m-2">
                                 <Input type="text"
+                                       color="default"
                                        onChange={handleChange}
                                        value={loginFormData.email}
                                        label="Email"
@@ -97,6 +97,7 @@ export default function LoginForm() {
 
                             <div className="flex flex-wrap md:flex-nowrap gap-4 m-2">
                                 <Input type={isVisible ? "text" : "password"}
+                                       color="default"
                                        onChange={handleChange}
                                        value={loginFormData.password}
                                        label="Password"

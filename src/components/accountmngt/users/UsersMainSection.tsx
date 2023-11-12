@@ -145,6 +145,7 @@ export default function UsersMainSection({query}: { query: string; }) {
                     )}
                 </TableHeader>
                 <TableBody
+                    emptyContent={!isLoading && userList.length === 0 ? "No data to display." : null}
                     items={sortedItems}
                     loadingContent={<Spinner/>}
                     loadingState={isLoading ? "loading" : "idle"}>

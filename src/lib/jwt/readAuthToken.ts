@@ -11,12 +11,14 @@ export function getUserDetails(token: string): User {
         const id = userDetails.Id || "";
         const name = userDetails.Name || "";
         const email = userDetails.Email || "";
+        const isDefaultAdmin = userDetails.IsDefaultAdmin || 0;
 
         return {
             authToken: token,
             email: email,
             id: id,
-            name: name
+            name: name,
+            isDefaultAdmin:isDefaultAdmin
         };
 
     } catch (error: any) {

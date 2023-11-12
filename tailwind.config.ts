@@ -51,7 +51,7 @@ const config: Config = {
       "meta-8": "#F0950C",
       "meta-9": "#E5E7EB",
       success: "#219653",
-      danger: "#cb1e33",
+      danger: "#da1028",
       warning: "#FFA70B",
     },
     screens: {

@@ -1,4 +1,3 @@
-"use client";
 import React, {useEffect, useState} from 'react';
 import {
     Button,
@@ -10,23 +9,23 @@ import {
     TableBody, TableCell,
     TableColumn,
     TableHeader,
-    TableRow
+    TableRow, useDisclosure
 } from "@nextui-org/react";
-import {stagingTableColumns} from "@/lib/utils/tableUtils";
 import {StagingQueryParameters} from "@/boundary/parameters/StagingQueryParameters";
 import {getStagedRecords} from "@/lib/services/staging/stagingRecordService";
 import {AppModulesDict, StagingRecordStatus, StagingResponse} from "@/boundary/interfaces/staging";
 import PaginationComponent from "@/components/common/pagination/PaginationComponent";
-import RenderStagingCell from "@/components/staging/RenderStagingCell";
 import SearchComponent from "@/components/common/filter/SearchComponent";
-import {TableVisibleColumns} from "@/components/common/filter/TableVisibleColumns";
 import {getActionsForModule} from "@/helpers/stagingHelpers";
 import {UserModuleActions} from "@/lib/utils/stagingUtils";
 import {ChevronDownIcon} from "@/components/shared/icons/ChevronDownIcon";
+import {EyeFilledIcon} from "@nextui-org/shared-icons";
+import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
+import ApproveNewUserModal from "@/components/accountmngt/users/modals/ApproveNewUserModal";
+import ModalComponent from './ModalComponent';
+import {toast} from "react-toastify";
 
-const INITIAL_VISIBLE_COLUMNS = ["entity", "action", "creator", "actions"];
-
-const StagedRecords = () => {
+const StagedRecords = ({query}: { query: string; }) => {
     const [selectedModule, setSelectedModule] = useState(AppModulesDict[0].name);
     const [selectedAction, setSelectedAction] = useState(UserModuleActions[0].name);
     const [selectedActionValue, setSelectedActionValue] = useState(UserModuleActions[0].permission);
@@ -35,17 +34,12 @@ const StagedRecords = () => {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
         column: "name",
         direction: "ascending",
     });
-
-    const headerColumns = React.useMemo(() => {
-        if (visibleColumns === "all") return stagingTableColumns;
-        return stagingTableColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
-    }, [visibleColumns]);
-
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [selectedStagingRecord, setSelectedStagingRecord] = useState<StagingResponse|null>(null);
 
     const fetchStagedRecords = (queryParams: StagingQueryParameters) => {
         getStagedRecords(queryParams)
@@ -73,9 +67,10 @@ const StagedRecords = () => {
         queryParams.pageNumber = currentPage;
         queryParams.action = selectedActionValue;
         queryParams.status = StagingRecordStatus.Pending;
+        queryParams.searchTerm = query;
         console.log("queryParams", queryParams)
         fetchStagedRecords(queryParams);
-    }, [currentPage, selectedModule, selectedAction]);
+    }, [currentPage, selectedModule, selectedAction, query]);
 
     /***
      *sorting data
@@ -93,29 +88,11 @@ const StagedRecords = () => {
     }, [sortDescriptor, stagedRecords]);
 
     /**
-     * staging table visible columns e.g. filter
-     */
-    const getVisibleColumns = React.useMemo(() => {
-        return <TableVisibleColumns
-            visibleColumns={visibleColumns}
-            setVisibleColumns={setVisibleColumns}
-            tableColumns={stagingTableColumns}
-        />
-    }, [visibleColumns]);
-
-    /**
      * staging table pagination
      */
     function getBottomContent() {
         return PaginationComponent(totalPages, currentPage, setCurrentPage);
     }
-
-    /**
-     * custom cell rendering
-     */
-    const renderCell = React.useCallback((stagingRecord: StagingResponse, columnKey: React.Key) => {
-        return RenderStagingCell(stagingRecord, columnKey);
-    }, []);
 
     // Handle module selection change
     const handleModuleChange = (module: any) => {
@@ -125,6 +102,33 @@ const StagedRecords = () => {
         const defaultAction = getActionsForModule(newModule)[0];
         setSelectedAction(defaultAction.name);
         setSelectedActionValue(defaultAction.permission);
+    };
+
+    const handleViewClick = (stagingRecord:StagingResponse|null) => {
+        console.log("selected item", stagingRecord);
+        setSelectedStagingRecord(stagingRecord);
+        onOpen();
+    };
+
+    const handleCloseModal = () => {
+        setSelectedStagingRecord(null);
+        onOpenChange();
+    };
+
+    const getModalForAction = (stagingRecord: StagingResponse) => {
+        switch (stagingRecord.action) {
+            case MapPermission(AdminPortalPermission.PermissionsUsersCreate):
+                return (
+                    <ApproveNewUserModal
+                        stagingRecord={stagingRecord}
+                        isOpen={isOpen}
+                        onClose={handleCloseModal}
+                    />
+                );
+
+            default:
+                return null;
+        }
     };
 
     return (
@@ -188,8 +192,6 @@ const StagedRecords = () => {
                                 )}
                             </DropdownMenu>
                         </Dropdown>
-                        {getVisibleColumns}
-
                     </div>
 
                     <SearchComponent placeholder="Search for staging"/>
@@ -201,31 +203,39 @@ const StagedRecords = () => {
                 onSortChange={setSortDescriptor}
                 topContentPlacement="outside"
                 bottomContent={getBottomContent()}>
-                <TableHeader columns={headerColumns}>
-                    {(column) => (
-                        <TableColumn
-                            key={column.uid}
-                            align={column.uid === "actions" ? "center" : "start"}
-                            allowsSorting={column.sortable}>
-                            {column.name}
-                        </TableColumn>
-                    )}
+                <TableHeader>
+                    <TableColumn>Entity</TableColumn>
+                    <TableColumn>Action</TableColumn>
+                    <TableColumn>Creator</TableColumn>
+                    <TableColumn>Date Created</TableColumn>
+                    <TableColumn>Actions</TableColumn>
                 </TableHeader>
                 <TableBody
+                    emptyContent={!isLoading && stagedRecords.length === 0 ? "No data to display." : null}
                     items={sortedItems}
                     loadingContent={<Spinner/>}
                     loadingState={isLoading ? "loading" : "idle"}>
                     {(stagingRecord: StagingResponse) => (
                         <TableRow key={stagingRecord.id}>
-                            {(columnKey) =>
-                                <TableCell>
-                                    {renderCell(stagingRecord, columnKey)}
-                                </TableCell>
-                            }
+                            <TableCell>{stagingRecord.entity}</TableCell>
+                            <TableCell>{stagingRecord.action}</TableCell>
+                            <TableCell>{stagingRecord.creator}</TableCell>
+                            <TableCell>{stagingRecord.dateCreated}</TableCell>
+                            <TableCell>
+                                <Button
+                                    onClick={() => handleViewClick(stagingRecord)}
+                                    startContent={<EyeFilledIcon/>}
+                                        color="primary"
+                                        variant="shadow">
+                                    View
+                                </Button>
+                            </TableCell>
                         </TableRow>
                     )}
                 </TableBody>
             </Table>
+
+            {selectedStagingRecord && getModalForAction(selectedStagingRecord)}
         </>
     );
 };
