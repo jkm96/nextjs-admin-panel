@@ -11,6 +11,7 @@ export interface CreateUserRequest{
     firstName: string;
     lastName: string;
     userName: string;
+    phoneNumber: string;
     userRolesList: UserRoleModel[];
 }
 

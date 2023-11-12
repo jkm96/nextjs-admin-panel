@@ -57,8 +57,10 @@ export function validateRegisterFormInputErrors(formData: RegisterUserRequest) {
 
 export function validateCreateUserFormInputErrors(createUserFormData: CreateUserRequest) {
     const errors:CreateUserRequest = {
+        userRolesList: [],
         email: "",   lastName: "",
-        firstName: "", userName: ""
+        firstName: "", userName: "",
+        phoneNumber:""
     }
 
     if (createUserFormData.email.trim() === "") {
@@ -81,13 +83,19 @@ export function validateCreateUserFormInputErrors(createUserFormData: CreateUser
 
     if (createUserFormData.userName.trim() === "") {
         errors.userName = "userName cannot be empty";
-    } else if (createUserFormData.userName.trim().length < 4) {
+    } else if (createUserFormData.userName.trim().length < 5) {
         errors.userName = "userName must be at least 4 characters long";
+    }
+
+    if (createUserFormData.phoneNumber.trim() === "") {
+        errors.phoneNumber = "phoneNumber cannot be empty";
+    } else if (createUserFormData.phoneNumber.trim().length < 8 || createUserFormData.phoneNumber.trim().length > 13) {
+        errors.phoneNumber = "phoneNumber must be between 8-13 characters long";
     }
 
     // Check if there are any errors and return null if all input is valid
     for (const key in errors) {
-        if (errors[key as keyof CreateUserRequest] !== "") {
+        if (key !== 'userRolesList' && errors[key as keyof CreateUserRequest] !== "") {
             return errors;
         }
     }

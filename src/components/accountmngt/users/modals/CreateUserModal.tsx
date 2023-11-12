@@ -20,25 +20,26 @@ import {validateCreateUserFormInputErrors} from "@/helpers/validationHelpers";
 import {CreateUserRequest, UserRoleModel} from "@/boundary/interfaces/user";
 import {MailIcon} from "@/components/shared/icons/MailIcon";
 import {toast} from "react-toastify";
-import {createStagingRecord} from "@/lib/services/staging/stagingRecordService";
+import {upsertStagingRecord} from "@/lib/services/staging/stagingRecordService";
 import {StagingRecordStatus, StagingUpsertRequest} from "@/boundary/interfaces/staging";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import {useAuth} from "@/hooks/useAuth";
 
 const initialFormState: CreateUserRequest = {
+    phoneNumber: "",
     email: "", lastName: "",
     firstName: "", userName: "",
-    userRolesList: [],
+    userRolesList: []
 };
 export default function CreateUserModal() {
     const {user} = useAuth();
-    const {isOpen, onOpen, onOpenChange,onClose} = useDisclosure();
+    const {isOpen, onOpen, onOpenChange, onClose} = useDisclosure();
     const [roleList, setRoleList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [backendError, setBackendError] = useState("");
     const [createUserFormData, setCreateUserFormData] = useState<CreateUserRequest>(initialFormState);
     const [inputErrors, setInputErrors] = useState({
-        email: "", lastName: "",
+        email: "", lastName: "",phoneNumber: "",
         firstName: "", userName: ""
     });
 
@@ -87,15 +88,15 @@ export default function CreateUserModal() {
         });
     };
 
-
     const handleUserCreationSubmit = async (e: any) => {
         e.preventDefault();
         setBackendError("");
         setIsSubmitting(true)
 
         const inputErrors = validateCreateUserFormInputErrors(createUserFormData);
-        console.log("errors", inputErrors)
         if (inputErrors && Object.keys(inputErrors).length > 0) {
+            console.log("errors", inputErrors)
+            console.log("errors count", Object.keys(inputErrors).length)
             setInputErrors(inputErrors);
             setIsSubmitting(false)
             return;
@@ -105,7 +106,8 @@ export default function CreateUserModal() {
             createUserFormData.email.trim() === "" ||
             createUserFormData.userName.trim() === "" ||
             createUserFormData.firstName.trim() === "" ||
-            createUserFormData.lastName.trim() === ""
+            createUserFormData.lastName.trim() === ""||
+            createUserFormData.phoneNumber.trim() === ""
         ) {
             setIsSubmitting(false)
             return;
@@ -118,20 +120,28 @@ export default function CreateUserModal() {
             return;
         }
 
+        const selectedRoles = createUserFormData
+            .userRolesList
+            .filter((role) => role.selected);
+
+        const dataAfter = {
+            ...createUserFormData,
+            userRolesList: selectedRoles,
+        };
         const stagingRequest: StagingUpsertRequest = {
             id: 0,
             entity: createUserFormData.email,
             dataBefore: JSON.stringify(initialFormState),
-            dataAfter: JSON.stringify(createUserFormData),
+            dataAfter: JSON.stringify(dataAfter),
             creator: user?.email,
             approverId: user?.id,
             action: MapPermission(AdminPortalPermission.PermissionsUsersCreate),
             status: StagingRecordStatus.Pending,
             comments: "Request for data add"
         };
-
-        let response = await createStagingRecord(stagingRequest);
-        console.log("create user response", response)
+        console.log("upsert user request", stagingRequest)
+        let response = await upsertStagingRecord(stagingRequest);
+        console.log("upsert user response", response)
         if (response.statusCode === 200) {
             toast.success(response.message)
             setIsSubmitting(false)
@@ -172,6 +182,7 @@ export default function CreateUserModal() {
                                 <form onSubmit={handleUserCreationSubmit}>
                                     <div className="grid md:grid-cols-2 md:gap-6">
                                         <Input type="email"
+                                               className="mt-2 mb-1 "
                                                onChange={handleChange}
                                                value={createUserFormData.email}
                                                label="Email"
@@ -193,6 +204,7 @@ export default function CreateUserModal() {
                                                value={createUserFormData.userName}
                                                label="Username"
                                                name="userName"
+                                               className="mt-2 mb-1 "
                                                variant={"bordered"}
                                                placeholder="Enter username"
                                                endContent={
@@ -217,6 +229,7 @@ export default function CreateUserModal() {
                                                        className="fill-current"/>
                                                }
                                                variant={"bordered"}
+                                               className="mt-2 mb-1 "
                                                placeholder="Enter firstName"
                                                onInput={() => {
                                                    setInputErrors({...inputErrors, firstName: ""});
@@ -234,12 +247,33 @@ export default function CreateUserModal() {
                                                        className="fill-current"/>
                                                }
                                                variant={"bordered"}
+                                               className="mt-2 mb-1 "
                                                placeholder="Enter lastName"
                                                onInput={() => {
                                                    setInputErrors({...inputErrors, lastName: ""});
                                                }}
                                                isInvalid={inputErrors.lastName !== ""}
                                                errorMessage={inputErrors.lastName}/>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 md:gap-6">
+                                        <Input type="text"
+                                               onChange={handleChange}
+                                               value={createUserFormData.phoneNumber}
+                                               label="PhoneNumber"
+                                               name="phoneNumber"
+                                               endContent={
+                                                   <PersonIcon
+                                                       className="fill-current"/>
+                                               }
+                                               variant={"bordered"}
+                                               className="mt-2 mb-1 "
+                                               placeholder="Enter phone number"
+                                               onInput={() => {
+                                                   setInputErrors({...inputErrors, phoneNumber: ""});
+                                               }}
+                                               isInvalid={inputErrors.phoneNumber !== ""}
+                                               errorMessage={inputErrors.phoneNumber}/>
                                     </div>
 
                                     <h3>Roles</h3>

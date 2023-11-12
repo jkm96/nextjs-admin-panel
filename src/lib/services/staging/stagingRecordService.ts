@@ -21,9 +21,9 @@ export async function getStagedRecords(queryParams: StagingQueryParameters) {
     }
 }
 
-export async function createStagingRecord(createRequest: StagingUpsertRequest) {
+export async function upsertStagingRecord(createRequest: StagingUpsertRequest) {
     try {
-        const response = await fetch(`${internalBaseUrl}/staging/create`, {
+        const response = await fetch(`${internalBaseUrl}/staging/upsert`, {
             method: 'POST',
             headers: {
                 'x-api-key': `${apiKey}`,

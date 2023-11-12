@@ -105,7 +105,6 @@ const StagedRecords = ({query}: { query: string; }) => {
     };
 
     const handleViewClick = (stagingRecord:StagingResponse|null) => {
-        console.log("selected item", stagingRecord);
         setSelectedStagingRecord(stagingRecord);
         onOpen();
     };
