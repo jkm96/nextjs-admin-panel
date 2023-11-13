@@ -1,9 +1,8 @@
 import {useEffect} from "react";
 import {hasRequiredPermissions} from "@/helpers/permissionsHelper";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
-import AuthorizeComponent from "@/components/common/auth/AuthorizeComponent";
 
-function DashboardPage() {
+function DashboardSection() {
     useEffect(() => {
         async function fetchData() {
             const canViewStaging = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsStagingRecordsView)]);
@@ -18,11 +17,10 @@ function DashboardPage() {
 
         fetchData();
     }, []);
-    return(
+    return (
         <>
             <p>Dashboard Page</p>
         </>
     )
 }
-const viewPermission = MapPermission(AdminPortalPermission.PermissionsAccessAll)
-export default AuthorizeComponent( [viewPermission])(DashboardPage);
+export default DashboardSection;

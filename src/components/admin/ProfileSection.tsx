@@ -62,7 +62,6 @@ export default function ProfileSection({user}: ProfileSectionProps) {
                             {user?.name}
                         </h3>
                         <p className="font-medium">{user?.email}</p>
-                        <p className="font-medium">{user?.id}</p>
 
                         <div className="mx-auto max-w-180">
                             <h4 className="font-semibold text-black dark:text-white">

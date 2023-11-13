@@ -1,15 +1,15 @@
-import React, {useState, useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
-    Spinner,
-    SortDescriptor,
-    Selection,
     ChipProps,
+    Selection,
+    SortDescriptor,
+    Spinner,
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow,
 } from "@nextui-org/react";
 import {auditTableColumns} from "@/lib/utils/tableUtils";
 import PaginationComponent from "@/components/common/pagination/PaginationComponent";
@@ -17,10 +17,10 @@ import SearchComponent from "@/components/common/filter/SearchComponent";
 import {TableVisibleColumns} from "@/components/common/filter/TableVisibleColumns";
 import {AuditQueryParameters} from "@/boundary/parameters/AuditQueryParameters";
 import {getAuditRecords} from "@/lib/services/audit/auditTrailService";
-import {AuditRecordResponse} from "@/boundary/interfaces/audit";
+import {AppAuditType, AuditRecordResponse} from "@/boundary/interfaces/audit";
 import RenderAuditTrailCell from "@/components/audittrails/RenderAuditTrailCell";
 
-const INITIAL_VISIBLE_COLUMNS = ["module", "auditType", "creatorEmail","createdOn", "actions"];
+const INITIAL_VISIBLE_COLUMNS = ["module", "auditType","description", "creatorEmail","createdOn", "actions"];
 
 export default function AuditTrailsSection({query}: { query: string; }) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -73,6 +73,7 @@ export default function AuditTrailsSection({query}: { query: string; }) {
         const queryParams: AuditQueryParameters = new AuditQueryParameters();
         queryParams.pageNumber = currentPage;
         queryParams.searchTerm = query;
+        queryParams.auditType = AppAuditType.Visit;
         fetchAuditRecords(queryParams);
     }, [currentPage, query]);
 

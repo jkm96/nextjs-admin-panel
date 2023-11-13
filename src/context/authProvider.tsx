@@ -39,7 +39,6 @@ export function AuthProvider({children}: AuthContextProps) {
         // Fetch user data based on the token, then set the user
         const fetchAccessToken = async () => {
             const response = await getAccessToken();
-            console.log("ctx response", response)
             if (response.statusCode === 200){
                 const tokenResponse = response.data;
                 const { accessToken } = tokenResponse;

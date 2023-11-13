@@ -213,7 +213,7 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                             <Link
                                 href="/dashboard/staging"
                                 className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                                    pathname.includes("settings") &&
+                                    pathname.includes("staging") &&
                                     "bg-graydark dark:bg-meta-4"
                                 }`}
                             >
@@ -228,12 +228,12 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}: SidebarProps) => {
                             <Link
                                 href="/dashboard/audit-trails"
                                 className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                                    pathname.includes("settings") &&
+                                    pathname.includes("audit-trails") &&
                                     "bg-graydark dark:bg-meta-4"
                                 }`}
                             >
                                 <SettingsIcon/>
-                                Staging
+                                Audit Trails
                             </Link>
                         </li>
                         {/* <!-- Menu Item Audit Records --> */}

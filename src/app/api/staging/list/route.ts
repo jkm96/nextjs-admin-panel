@@ -3,32 +3,18 @@ import adminApiClient from "@/lib/axios/axiosClient";
 import {NextRequest} from "next/server";
 import {cookieName} from "@/boundary/constants/appConstants";
 import {AxiosRequestConfig} from "axios";
+import {getStagingQueryParams} from "@/helpers/urlHelpers";
 
 export async function GET(request: NextRequest) {
     try {
         const tokenCookie = request.cookies.get(`${cookieName}`)?.value as string;
         const {accessToken} = JSON.parse(tokenCookie);
-
-        const url = new URL(request.url)
-        const searchParams = new URLSearchParams(url.search);
-        const pageSize = searchParams.get('pageSize');
-        const pageNumber = searchParams.get('pageNumber');
-        const orderBy = searchParams.get('orderBy');
-        const searchTerm = searchParams.get('searchTerm');
-        const action = searchParams.get('action');
-        const status = searchParams.get('status');
+        const queryParams = getStagingQueryParams(request);
         const config: AxiosRequestConfig = {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             },
-            params: {
-                pageSize,
-                pageNumber,
-                orderBy,
-                searchTerm,
-                status,
-                action
-            }
+            params: queryParams
         };
 
         const response = await adminApiClient.get('staging-records', config);

@@ -1,6 +1,21 @@
 "use client";
-import DashboardPage from "@/components/dashboard/DashboardPage";
+import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
+import AuthorizeComponent from "@/components/common/auth/AuthorizeComponent";
+import DashboardSection from "@/components/dashboard/DashboardSection";
+import {useEffect} from "react";
+import visitAuditing from "@/helpers/auditHelpers";
 
-export default function Dashboard() {
-    return <DashboardPage/>;
+function DashboardPage() {
+    console.log("Executing useEffect");
+    useEffect(() => {
+        async function trackPage() {
+            await visitAuditing("dashboard")
+        }
+        trackPage();
+    }, []);
+    return   <DashboardSection/>
 }
+
+
+const viewPermission = MapPermission(AdminPortalPermission.PermissionsAccessAll)
+export default AuthorizeComponent([viewPermission])(DashboardPage)

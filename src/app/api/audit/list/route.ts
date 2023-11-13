@@ -1,38 +1,25 @@
-import {handleAxiosResponse, handleApiException} from "@/helpers/responseHelpers";
+import {handleApiException, handleAxiosResponse} from "@/helpers/responseHelpers";
 import adminApiClient from "@/lib/axios/axiosClient";
 import {NextRequest} from "next/server";
 import {cookieName} from "@/boundary/constants/appConstants";
 import {AxiosRequestConfig} from "axios";
+import {getAuditQueryParams} from "@/helpers/urlHelpers";
 
 export async function GET(request: NextRequest) {
     try {
         const tokenCookie = request.cookies.get(`${cookieName}`)?.value as string;
         const {accessToken} = JSON.parse(tokenCookie);
 
-        const url = new URL(request.url)
-        const searchParams = new URLSearchParams(url.search);
-        const pageSize = searchParams.get('pageSize');
-        const pageNumber = searchParams.get('pageNumber');
-        const orderBy = searchParams.get('orderBy');
-        const searchTerm = searchParams.get('searchTerm');
-        const auditType = searchParams.get('auditType');
-        const module = searchParams.get('module');
+        const queryParams = getAuditQueryParams(request);
         const config: AxiosRequestConfig = {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             },
-            params: {
-                pageSize,
-                pageNumber,
-                orderBy,
-                searchTerm,
-                auditType,
-                module
-            }
+            params: queryParams
         };
 
-        const response = await adminApiClient.get('staging-records', config);
-        console.log("fetch staging response", response.data);
+        const response = await adminApiClient.get('audit-trails', config);
+        console.log("fetch audit response", response.data);
         return handleAxiosResponse(response);
     } catch (error: unknown) {
         return handleApiException(error);

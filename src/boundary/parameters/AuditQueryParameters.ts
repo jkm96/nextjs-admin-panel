@@ -4,17 +4,13 @@ import {AppAuditType, ApplicationModule} from "@/boundary/interfaces/audit";
 
 export class AuditQueryParameters extends RequestParameters {
     public searchTerm: string;
-    public action: string | null;
-    public status: StagingRecordStatus | null;
-    public auditType: AppAuditType | null;
-    public module: ApplicationModule | null;
+    public auditType?: AppAuditType;
+    public module?: ApplicationModule;
+    public periodFrom?: Date;
+    public periodTo?: Date;
 
     constructor() {
         super(10, 1, "createdOn desc");
         this.searchTerm = "";
-        this.status = null;
-        this.action = null;
-        this.auditType = null;
-        this.module = null;
     }
 }
