@@ -8,7 +8,6 @@ import {
     ModalFooter,
     ModalHeader,
     Table, TableBody, TableCell, TableColumn,
-    getKeyValue,
     useDisclosure, TableHeader, TableRow, Checkbox
 } from "@nextui-org/react";
 import {PlusIcon} from "@/components/shared/icons/PlusIcon";
@@ -24,6 +23,8 @@ import {upsertStagingRecord} from "@/lib/services/staging/stagingRecordService";
 import {StagingRecordStatus, StagingUpsertRequest} from "@/boundary/interfaces/staging";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import {useAuth} from "@/hooks/useAuth";
+import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
+import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 
 const initialFormState: CreateUserRequest = {
     phoneNumber: "",
@@ -143,6 +144,15 @@ export default function CreateUserModal() {
         let response = await upsertStagingRecord(stagingRequest);
         console.log("upsert user response", response)
         if (response.statusCode === 200) {
+            const auditRequest: AuditRecordRequest = {
+                auditType: AppAuditType.CreateInitiated,
+                module: ApplicationModule.Users,
+                comment: "",
+                dataAfter:  JSON.stringify(dataAfter),
+                dataBefore: JSON.stringify(dataAfter),
+                description: `Initiated creation of user ${createUserFormData.email}`,
+            }
+            await addAuditRecord(auditRequest);
             toast.success(response.message)
             setIsSubmitting(false)
             setCreateUserFormData(initialFormState)

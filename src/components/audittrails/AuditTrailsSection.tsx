@@ -45,7 +45,7 @@ export default function AuditTrailsSection({query}: { query: string; }) {
     }, [visibleColumns]);
 
     /**
-     * fetch user data from api
+     * fetch audit trails data from api
      * @param queryParams
      */
     const fetchAuditRecords = (queryParams: AuditQueryParameters) => {
@@ -73,7 +73,6 @@ export default function AuditTrailsSection({query}: { query: string; }) {
         const queryParams: AuditQueryParameters = new AuditQueryParameters();
         queryParams.pageNumber = currentPage;
         queryParams.searchTerm = query;
-        queryParams.auditType = AppAuditType.Visit;
         fetchAuditRecords(queryParams);
     }, [currentPage, query]);
 

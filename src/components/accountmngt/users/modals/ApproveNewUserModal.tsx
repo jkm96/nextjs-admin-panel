@@ -5,20 +5,20 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-    Button,
-    Checkbox,
-    Input,
-    Link, user
+    Button
 } from "@nextui-org/react";
 import {StagingRecordStatus, StagingResponse, StagingUpsertRequest} from "@/boundary/interfaces/staging";
 import {hasRequiredPermissions} from "@/helpers/permissionsHelper";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import {useAuth} from "@/hooks/useAuth";
-import {CreateUserRequest} from "@/boundary/interfaces/user";
+import {CreateUserRequest, User} from "@/boundary/interfaces/user";
 import {toast} from "react-toastify";
 import {createUser} from "@/lib/services/accountmngt/userService";
 import {upsertStagingRecord} from "@/lib/services/staging/stagingRecordService";
 import {useRouter} from "next/navigation";
+import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
+import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
+import {checkIfCanApproveAction} from "@/helpers/stagingHelpers";
 
 export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
     stagingRecord: StagingResponse,
@@ -28,11 +28,12 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
     const router = useRouter()
     const [canApprove, setCanApprove] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeclining, setIsDeclining] = useState(false);
     const {user} = useAuth();
     const [createUserRequest, setCreateUserRequest] = useState<CreateUserRequest>({} as CreateUserRequest);
     const [comment, setComment] = useState('');
 
-    const handleCommentChange = (event:any) => {
+    const handleCommentChange = (event: any) => {
         setComment(event.target.value);
     };
 
@@ -44,7 +45,7 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
             firstName: jsonData.firstName,
             lastName: jsonData.lastName,
             userName: jsonData.userName,
-            phoneNumber:jsonData.phoneNumber,
+            phoneNumber: jsonData.phoneNumber,
             userRolesList: jsonData.userRolesList
         };
         setCreateUserRequest(userRequest)
@@ -54,29 +55,20 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
     useEffect(() => {
         async function checkPermissions() {
             const canApproveAction = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersApprove)]);
-            if (user !== null && user?.isDefaultAdmin != 1 && canApproveAction && stagingRecord.creator !== user.email) {
-                setCanApprove(true)
-                console.log("can approve", canApprove)
-            }
-
-            if (user?.isDefaultAdmin === 1) {
-                setCanApprove(true)
-                console.log("can approve", canApprove)
-            }
-
+            const canApprove = checkIfCanApproveAction(user, canApproveAction, stagingRecord);
+            setCanApprove(canApprove)
         }
 
         checkPermissions();
     }, []);
 
     async function handleApprove() {
-        if (comment.length === 0){
+        if (comment.length === 0) {
             toast.error("A comment is required")
             return;
         }
         setIsSubmitting(true)
         let response = await createUser(createUserRequest);
-        console.log("response", response)
         if (response.statusCode === 200) {
             toast.success(response.message)
             setIsSubmitting(false);
@@ -92,10 +84,17 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
                 status: StagingRecordStatus.Completed,
                 comments: comment
             };
-console.log("stagingRequest",stagingRequest)
             const upsertResponse = await upsertStagingRecord(stagingRequest);
-            console.log("upsertResponse",upsertResponse)
-            if (upsertResponse.statusCode === 200){
+            if (upsertResponse.statusCode === 200) {
+                const auditRequest: AuditRecordRequest = {
+                    auditType: AppAuditType.CreateApproved,
+                    module: ApplicationModule.Users,
+                    comment: comment,
+                    dataAfter:  stagingRecord.dataAfter,
+                    dataBefore: stagingRecord.dataBefore,
+                    description: `Approved creation of user ${createUserRequest.email}`,
+                }
+                await addAuditRecord(auditRequest);
                 router.push("/dashboard/users")
             }
         } else {
@@ -106,6 +105,11 @@ console.log("stagingRequest",stagingRequest)
     }
 
     async function handleDecline() {
+        if (comment.length === 0) {
+            toast.error("A comment is required")
+            return;
+        }
+        setIsDeclining(true)
         const stagingRequest: StagingUpsertRequest = {
             id: stagingRecord.id,
             entity: createUserRequest.email,
@@ -117,16 +121,23 @@ console.log("stagingRequest",stagingRequest)
             status: StagingRecordStatus.Declined,
             comments: comment
         };
-        console.log("stagingRequest", stagingRequest)
         const upsertResponse = await upsertStagingRecord(stagingRequest);
-        console.log("upsertResponse",upsertResponse)
-        if (upsertResponse.statusCode === 200){
+        if (upsertResponse.statusCode === 200) {
+            setIsDeclining(false)
+            const auditRequest: AuditRecordRequest = {
+                auditType: AppAuditType.CreateDeclined,
+                module: ApplicationModule.Users,
+                comment: comment,
+                dataAfter:  stagingRecord.dataAfter,
+                dataBefore: stagingRecord.dataBefore,
+                description: `declined creation of user ${createUserRequest.email}`,
+            }
+            await addAuditRecord(auditRequest);
             toast.success(upsertResponse.message)
             onClose()
-            //TODO add to audit-trails trails
-        }else{
+        } else {
+            setIsDeclining(false)
             toast.error(upsertResponse.message)
-            //TODO add to audit-trails trails
         }
     }
 
@@ -203,7 +214,8 @@ console.log("stagingRequest",stagingRequest)
                                                    defaultValue={createUserRequest.phoneNumber}
                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                             focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" disabled={true}/>
+                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                   disabled={true}/>
                                         </div>
                                     </div>
 
@@ -248,16 +260,17 @@ console.log("stagingRequest",stagingRequest)
                                         ))}
                                         </tbody>
                                     </table>
-                                <div className="mb-6">
-                                    <label htmlFor="large-input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
-                                    <input type="text" id="large-input"
-                                           value={comment}
-                                           onChange={handleCommentChange}
-                                           placeholder="Type comment"
-                                           className="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50
+                                    <div className="mb-6">
+                                        <label htmlFor="large-input"
+                                               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
+                                        <input type="text" id="large-input"
+                                               value={comment}
+                                               onChange={handleCommentChange}
+                                               placeholder="Type comment"
+                                               className="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50
                                     sm:text-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white
                                     dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
-                                </div>
+                                    </div>
                                 </ModalBody>
                             )}
                             <ModalFooter>
@@ -267,7 +280,7 @@ console.log("stagingRequest",stagingRequest)
                                 {canApprove && (
                                     <>
                                         <Button color="danger" onPress={handleDecline}>
-                                            Decline
+                                            {isDeclining ? "Declining..." : "Decline"}
                                         </Button>
                                         <Button color="success" onPress={handleApprove}>
                                             {isSubmitting ? "Approving..." : "Approve"}
