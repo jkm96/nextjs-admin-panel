@@ -32,9 +32,11 @@ const initialFormState: CreateUserRequest = {
     firstName: "", userName: "",
     userRolesList: []
 };
-export default function CreateUserModal() {
+export default function CreateUserModal({isOpen, onClose}: {
+    isOpen: boolean,
+    onClose: () => void
+}) {
     const {user} = useAuth();
-    const {isOpen, onOpen, onOpenChange, onClose} = useDisclosure();
     const [roleList, setRoleList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [backendError, setBackendError] = useState("");
@@ -170,13 +172,10 @@ export default function CreateUserModal() {
 
     return (
         <>
-            <Button onPress={onOpen} color="primary" startContent={<PlusIcon/>}>
-                Add New
-            </Button>
             <Modal
                 isOpen={isOpen}
                 onOpenChange={() => {
-                    onOpenChange();
+                    onClose();
                     handleCloseModal();
                 }}
                 onClose={onClose}

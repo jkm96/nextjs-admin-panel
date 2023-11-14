@@ -20,6 +20,8 @@ import RenderUserCell from "@/components/accountmngt/users/RenderUserCell";
 import SearchComponent from "@/components/common/filter/SearchComponent";
 import CreateUserModal from "@/components/accountmngt/users/modals/CreateUserModal";
 import {TableVisibleColumns} from "@/components/common/filter/TableVisibleColumns";
+import {PlusIcon} from "@/components/shared/icons/PlusIcon";
+import CreateRoleModal from "@/components/accountmngt/roles/modals/CreateRoleModal";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "email", "status", "actions"];
 
@@ -44,6 +46,15 @@ export default function UsersMainSection({query}: { query: string; }) {
         if (visibleColumns === "all") return userTableColumns;
         return userTableColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     /**
      * fetch user data from api
@@ -124,7 +135,13 @@ export default function UsersMainSection({query}: { query: string; }) {
                     <SearchComponent placeholder="Search for users"/>
                     <div className="flex gap-3">
                         {getUserVisibleColumns}
-                        <CreateUserModal/>
+                        <Button onPress={handleOpenModal}
+                                startContent={<PlusIcon/>}
+                                color="primary"
+                                variant="shadow">
+                            Add New
+                        </Button>
+                        <CreateUserModal isOpen={isModalOpen} onClose={handleCloseModal}/>
                     </div>
                 </div>
             </div>

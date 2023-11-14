@@ -32,7 +32,7 @@ export default function RenderStagingCell(stagingRecord: StagingResponse, column
                                 variant="shadow">
                             View
                         </Button>
-                        <ApproveNewUserModal stagingRecord={stagingRecord} openModal={isModalOpen}/>
+                        <ApproveNewUserModal stagingRecord={stagingRecord} isOpen={isModalOpen} onClose={handleCloseModal}/>
                     </div>
                 );
 

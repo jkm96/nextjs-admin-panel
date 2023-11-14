@@ -8,7 +8,7 @@ import {
     TableCell,
     Spinner,
     SortDescriptor,
-    Selection,
+    Selection, Button,
 } from "@nextui-org/react";
 import {roleTableColumns} from "@/lib/utils/tableUtils";
 import PaginationComponent from "@/components/common/pagination/PaginationComponent";
@@ -18,6 +18,10 @@ import {RoleResponse} from "@/boundary/interfaces/role";
 import RenderRoleCell from "@/components/accountmngt/roles/RenderRoleCell";
 import {getRoles} from "@/lib/services/accountmngt/roleService";
 import {TableVisibleColumns} from "@/components/common/filter/TableVisibleColumns";
+import ApproveNewUserModal from "@/components/accountmngt/users/modals/ApproveNewUserModal";
+import CreateRoleModal from "@/components/accountmngt/roles/modals/CreateRoleModal";
+import {EyeFilledIcon} from "@nextui-org/shared-icons";
+import {PlusIcon} from "@/components/shared/icons/PlusIcon";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "description", "actions"];
 
@@ -32,11 +36,19 @@ export default function RolesMainSection({query}: { query: string; }) {
         column: "name",
         direction: "ascending",
     });
-
     const headerColumns = React.useMemo(() => {
         if (visibleColumns === "all") return roleTableColumns;
         return roleTableColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
     }, [visibleColumns]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     /**
      * fetch role data from api
@@ -118,7 +130,13 @@ export default function RolesMainSection({query}: { query: string; }) {
                     <SearchComponent placeholder="Search for roles"/>
                     <div className="flex gap-3">
                         {getRoleVisibleColumns}
-                        {/*<CreateRoleModal/>*/}
+                        <Button onPress={handleOpenModal}
+                                startContent={<PlusIcon/>}
+                                color="primary"
+                                variant="shadow">
+                            Add New
+                        </Button>
+                        <CreateRoleModal isOpen={isModalOpen} onClose={handleCloseModal}/>
                     </div>
                 </div>
             </div>

@@ -37,7 +37,6 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
         setComment(event.target.value);
     };
 
-
     useEffect(() => {
         const jsonData = JSON.parse(stagingRecord.dataAfter);
         const userRequest: CreateUserRequest = {
