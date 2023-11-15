@@ -6,19 +6,19 @@ enum AdminPortalPermission {
     PermissionsUsersActivate = 153,
     PermissionsUsersDeactivate = 154,
     PermissionsUsersResendConfirmation = 155,
-    PermissionsUsersRoles = 156,
     PermissionsUsersManageRoles = 157,
     PermissionsUsersEdit = 158,
     PermissionsUsersDelete = 159,
     PermissionsUsersExport = 160,
     PermissionsUsersSearch = 161,
-    PermissionsUsersApprove = 162,
+    PermissionsUsersApproveCreate = 162,
     PermissionsUsersApproveEdit = 163,
     PermissionsUsersApproveActivate = 164,
     PermissionsUsersApproveDeactivate = 165,
     PermissionsUsersApproveResendConfirmation = 166,
     PermissionsUsersApproveManageRoles = 167,
     PermissionsUsersApproveDelete = 168,
+    PermissionsUsersApprovePasswordReset = 169,
 
     // Roles
     PermissionsRolesView = 200,
@@ -30,7 +30,6 @@ enum AdminPortalPermission {
     PermissionsRolesApproveCreate = 206,
     PermissionsRolesApproveEdit = 207,
     PermissionsRolesApproveDelete = 208,
-    PermissionsRolesApprove = 209,
 
     // RoleClaims
     PermissionsRoleClaimsView = 250,
@@ -48,7 +47,7 @@ enum AdminPortalPermission {
     PermissionsAuditTrailsExport = 401,
     PermissionsAuditTrailsSearch = 402,
 
-    //Staging Records
+    // Staging Records
     PermissionsStagingRecordsView = 450,
     PermissionsStagingRecordsSearch = 451,
 
@@ -58,7 +57,7 @@ enum AdminPortalPermission {
     PermissionsSecurityPolicyEdit = 452,
 
     // SuperAdmin
-    PermissionsAccessAll = 9998
+    PermissionsAccessAll = 9998,
 }
 
 export default AdminPortalPermission;

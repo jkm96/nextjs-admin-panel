@@ -7,5 +7,5 @@ function StagingRecordPage({searchParams}: { searchParams?: { query?: string; };
     return <StagingRecords query={query}/>
 }
 
-const viewPermission = MapPermission(AdminPortalPermission.PermissionsUsersView)
+const viewPermission = MapPermission(AdminPortalPermission.PermissionsStagingRecordsView)
 export default AuthorizeComponent([viewPermission])(StagingRecordPage);

@@ -1,6 +1,7 @@
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import {getAccessToken} from "@/lib/services/token/tokenService";
 import {getUserPackedPermissions} from "@/lib/jwt/readAuthToken";
+import {Permission} from "@/boundary/interfaces/permission";
 
 export async function hasRequiredPermissions(requiredPermissions: string[]): Promise<boolean> {
     //TODO get packed permissions string from auth token
@@ -49,4 +50,20 @@ export function unpackPermissionsFromString(packedPermissions: string): string[]
 
 function getEnumNamesFromValues(values: number[]): string[] {
     return values.map((value) => AdminPortalPermission[value]);
+}
+
+export function groupPermissionsByGroup(permissions: Permission[]): Record<string, Permission[]> {
+    const groupedPermissions: Record<string, Permission[]> = {};
+
+    permissions.forEach(permission => {
+        const group = permission.group;
+
+        if (!groupedPermissions[group]) {
+            groupedPermissions[group] = [];
+        }
+
+        groupedPermissions[group].push(permission);
+    });
+
+    return groupedPermissions;
 }

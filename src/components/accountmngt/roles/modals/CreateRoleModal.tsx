@@ -1,41 +1,73 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button} from "@nextui-org/react";
+import {getRegisteredPermissions} from "@/lib/services/accountmngt/roleService";
+import {toast} from "react-toastify";
+import {Permission} from "@/boundary/interfaces/permission";
+import {groupPermissionsByGroup} from "@/helpers/permissionsHelper";
 
 export default function CreateRoleModal({isOpen, onClose}: {
     isOpen: boolean,
     onClose: () => void
 }) {
+    const [groupedPermissions, setGroupedPermissions] = useState<Record<string, Permission[]>>({});
+    const fetchPermissions = async () => {
+        await getRegisteredPermissions()
+            .then((response) => {
+                if (response.statusCode === 200) {
+                    const permissionData = response.data;
+                    console.log("permissionData", permissionData)
+
+                    const permissions: Permission[] = permissionData;
+
+                    const groupedPermissions = groupPermissionsByGroup(permissions);
+
+                    console.log("groupedPermissions",groupedPermissions);
+                    setGroupedPermissions(groupedPermissions);
+                }
+            })
+            .catch((error) => {
+                toast.error(`Error fetching permissions: ${error}`)
+            })
+    }
+    useEffect(() => {
+        if (isOpen){
+            fetchPermissions();
+        }
+    }, [isOpen]);
+
     return (
         <>
             <Modal
                 isOpen={isOpen}
                 onOpenChange={() => onClose()}
                 onClose={onClose}
-                size="4xl"
+                size="5xl"
                 placement="top-center"
+                scrollBehavior="inside"
             >
                 <ModalContent>
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">Create Role</ModalHeader>
                             <ModalBody>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                    Nullam pulvinar risus non risus hendrerit venenatis.
-                                    Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                                </p>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                    Nullam pulvinar risus non risus hendrerit venenatis.
-                                    Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                                </p>
-                                <p>
-                                    Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
-                                    dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis.
-                                    Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod.
-                                    Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur
-                                    proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
-                                </p>
+                                {Object.entries(groupedPermissions).map(([group, permissions]) => (
+                                    <div key={group}>
+                                        <h2>{group}</h2>
+                                        <ul>
+                                            {permissions.map((permission) => (
+                                                <li key={permission.value}>
+                                                    <label>
+                                                        <input
+                                                            type="checkbox"
+                                                            // Include your logic to determine if the checkbox is checked
+                                                        />
+                                                        {permission.description}
+                                                    </label>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>

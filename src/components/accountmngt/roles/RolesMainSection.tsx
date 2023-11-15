@@ -22,6 +22,7 @@ import ApproveNewUserModal from "@/components/accountmngt/users/modals/ApproveNe
 import CreateRoleModal from "@/components/accountmngt/roles/modals/CreateRoleModal";
 import {EyeFilledIcon} from "@nextui-org/shared-icons";
 import {PlusIcon} from "@/components/shared/icons/PlusIcon";
+import {toast} from "react-toastify";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "description", "actions"];
 
@@ -54,8 +55,8 @@ export default function RolesMainSection({query}: { query: string; }) {
      * fetch role data from api
      * @param queryParams
      */
-    const fetchRoles = (queryParams: RoleQueryParameters) => {
-        getRoles(queryParams)
+    const fetchRoles = async (queryParams: RoleQueryParameters) => {
+        await getRoles(queryParams)
             .then((response) => {
                 if (response.statusCode === 200) {
                     const parsedData = response.data;
@@ -69,6 +70,7 @@ export default function RolesMainSection({query}: { query: string; }) {
             })
             .catch((error) => {
                 console.error(`Error fetching roles: ${error}`);
+                toast.error(`Error fetching roles: ${error}`)
             })
             .finally(() => {
                 setIsLoading(false);

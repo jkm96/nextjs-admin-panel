@@ -53,7 +53,7 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
 
     useEffect(() => {
         async function checkPermissions() {
-            const canApproveAction = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersApprove)]);
+            const canApproveAction = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersApproveCreate)]);
             const canApprove = checkIfCanApproveAction(user, canApproveAction, stagingRecord);
             setCanApprove(canApprove)
         }

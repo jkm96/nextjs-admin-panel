@@ -27,3 +27,14 @@ export function getStagingQueryParams(request: NextRequest) {
 
     return {pageSize, pageNumber, orderBy, searchTerm, action, status};
 }
+
+export function getRoleQueryParams(request: NextRequest) {
+    const url = new URL(request.url)
+    const searchParams = new URLSearchParams(url.search);
+    const pageSize = searchParams.get('pageSize');
+    const pageNumber = searchParams.get('pageNumber');
+    const orderBy = searchParams.get('orderBy');
+    const searchTerm = searchParams.get('searchTerm');
+
+    return {pageSize, pageNumber, orderBy, searchTerm};
+}

@@ -54,6 +54,7 @@ export default function CreateUserModal({isOpen, onClose}: {
                     if (response.statusCode === 200) {
                         const parsedData = response.data;
                         const {data} = parsedData;
+                        console.log("create user modal", data)
                         // Map the fetched roles to UserRoleModel and set it in the userRolesList
                         const mappedRoles = data.map((role: any) => ({
                             roleName: role.name,

@@ -19,3 +19,21 @@ export async function getRoles(queryParams: RoleQueryParameters) {
         throw error;
     }
 }
+
+export async function getRegisteredPermissions() {
+    try {
+        const apiUrl = `${internalBaseUrl}/roles/permissions`;
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'x-api-key': apiKey,
+                'Content-type': 'application/json',
+            },
+            body: null,
+        });
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}
