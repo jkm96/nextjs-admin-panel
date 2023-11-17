@@ -5,7 +5,7 @@ const userTableColumns = [
     {name: "USERNAME", uid: "userName", sortable: true},
     {name: "STATUS", uid: "status", sortable: true},
     {name: "EMAIL CONFIRMED", uid: "emailConfirmed", sortable: true},
-    {name: "CREATED ON", uid: "CreatedOn", sortable: true},
+    {name: "CREATED ON", uid: "createdOn", sortable: true},
     {name: "ACTIONS", uid: "actions"},
 ];
 

@@ -1,13 +1,13 @@
 import {UserResponse} from "@/boundary/interfaces/user";
 import {Button, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, User} from "@nextui-org/react";
 import {VerticalDotsIcon} from "@/components/shared/icons/VerticalDotsIcon";
-import React from "react";
+import Link from "next/link";
 
 export default function RenderUserCell(user: UserResponse, columnKey: string | number | bigint, statusColorMap: Record<string, "default" | "primary" | "secondary" | "success" | "warning" | "danger" | undefined>) {
     // @ts-ignore
     const cellValue = user[columnKey];
     switch (columnKey) {
-        case "email":
+        case "createdOn":
             return (
                 <div className="flex flex-col">
                     <p className="text-bold text-small capitalize">{cellValue}</p>
@@ -42,7 +42,9 @@ export default function RenderUserCell(user: UserResponse, columnKey: string | n
                             </Button>
                         </DropdownTrigger>
                         <DropdownMenu>
-                            <DropdownItem>View</DropdownItem>
+                            <DropdownItem>
+                                <Link href={`/dashboard/users/${user.id}`}>View</Link>
+                            </DropdownItem>
                             <DropdownItem>Edit</DropdownItem>
                             <DropdownItem>Delete</DropdownItem>
                         </DropdownMenu>

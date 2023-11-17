@@ -54,13 +54,12 @@ export default function CreateUserModal({isOpen, onClose}: {
                     if (response.statusCode === 200) {
                         const parsedData = response.data;
                         const {data} = parsedData;
-                        console.log("create user modal", data)
-                        // Map the fetched roles to UserRoleModel and set it in the userRolesList
+
                         const mappedRoles = data.map((role: any) => ({
                             roleName: role.name,
                             roleId: role.id,
                             roleDescription: role.description,
-                            selected: false, // You can set the default value for selected as needed
+                            selected: false,
                         }));
 
                         setCreateUserFormData({
@@ -99,8 +98,6 @@ export default function CreateUserModal({isOpen, onClose}: {
 
         const inputErrors = validateCreateUserFormInputErrors(createUserFormData);
         if (inputErrors && Object.keys(inputErrors).length > 0) {
-            console.log("errors", inputErrors)
-            console.log("errors count", Object.keys(inputErrors).length)
             setInputErrors(inputErrors);
             setIsSubmitting(false)
             return;
@@ -116,10 +113,9 @@ export default function CreateUserModal({isOpen, onClose}: {
             setIsSubmitting(false)
             return;
         }
-        // Check if at least one role is selected
+
         if (!createUserFormData.userRolesList.some((role) => role.selected)) {
             setIsSubmitting(false);
-            // Show an error message or handle the case where no role is selected
             toast.error("Please select at least one role.");
             return;
         }
@@ -143,9 +139,9 @@ export default function CreateUserModal({isOpen, onClose}: {
             status: StagingRecordStatus.Pending,
             comments: "Request to add new user data"
         };
-        console.log("upsert user request", stagingRequest)
+
         let response = await upsertStagingRecord(stagingRequest);
-        console.log("upsert user response", response)
+
         if (response.statusCode === 200) {
             const auditRequest: AuditRecordRequest = {
                 auditType: AppAuditType.CreateInitiated,
@@ -163,7 +159,6 @@ export default function CreateUserModal({isOpen, onClose}: {
         } else {
             setIsSubmitting(false)
             toast.error(response.message ?? "Unknown error occurred")
-            setBackendError(response.message ?? "Unknown error occurred");
         }
     };
 
@@ -181,7 +176,7 @@ export default function CreateUserModal({isOpen, onClose}: {
                 }}
                 onClose={onClose}
                 placement="top-center"
-                size="4xl"
+                size="5xl"
             >
                 <ModalContent>
                     {(onClose) => (
@@ -288,9 +283,6 @@ export default function CreateUserModal({isOpen, onClose}: {
 
                                     <h3>Roles</h3>
                                     <Table aria-label="Example table with dynamic content"
-                                           classNames={{
-                                               base: "max-h-[320px] overflow-scroll",
-                                           }}
                                     >
                                         <TableHeader>
                                             <TableColumn>Name</TableColumn>

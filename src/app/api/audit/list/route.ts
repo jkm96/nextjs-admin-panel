@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         };
 
         const response = await adminApiClient.get('audit-trails', config);
-        console.log("fetch audit response", response.data);
+
         return handleAxiosResponse(response);
     } catch (error: unknown) {
         return handleApiException(error);

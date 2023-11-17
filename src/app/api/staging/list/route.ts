@@ -18,7 +18,6 @@ export async function GET(request: NextRequest) {
         };
 
         const response = await adminApiClient.get('staging-records', config);
-        console.log("fetch staging response", response.data);
         return handleAxiosResponse(response);
     } catch (error: unknown) {
         return handleApiException(error);

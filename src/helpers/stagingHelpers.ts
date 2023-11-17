@@ -21,10 +21,6 @@ export function checkIfCanApproveAction(user: User|null, canApproveAction: boole
         return true
     }
 
-    if (user?.isDefaultAdmin === 1) {
-        return true
-    }
-
-    return false;
+    return user?.isDefaultAdmin === 1;
 }
 

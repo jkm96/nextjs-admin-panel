@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         };
 
         const response = await adminApiClient.get('identity/role', config);
-        console.log("fetch role response", response.data);
+
         return handleAxiosResponse(response);
     } catch (error: unknown) {
         return handleApiException(error);

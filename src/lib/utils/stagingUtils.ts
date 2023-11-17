@@ -1,4 +1,3 @@
-
 const UserModuleActions = [
     { name: "New", permission: "PermissionsUsersCreate" },
     { name: "Edits", permission: "PermissionsUsersEdit" },
@@ -8,8 +7,8 @@ const UserModuleActions = [
 ];
 
 const RoleModuleActions = [
-    { name: "Create", permission: "PermissionsRolesCreate" },
-    { name: "Edit", permission: "PermissionsRolesEdit" },
+    { name: "New", permission: "PermissionsRolesCreate" },
+    { name: "Edits", permission: "PermissionsRolesEdit" },
 ];
 
 export {UserModuleActions,RoleModuleActions}

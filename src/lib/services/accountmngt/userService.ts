@@ -37,3 +37,21 @@ export async function createUser(createUserRequest: CreateUserRequest) {
         throw error;
     }
 }
+
+export async function getUserById(userId: string) {
+    try {
+        const apiUrl = `${internalBaseUrl}/users/${userId}`;
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'x-api-key': apiKey,
+                'Content-type': 'application/json',
+            },
+            body: null,
+        });
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}

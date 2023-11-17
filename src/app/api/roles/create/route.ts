@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
         };
         const requestBody = await request.text();
         const response = await adminApiClient.post('identity/role',`${requestBody}`, config);
-        console.log("post role response", response.data);
+
         return handleAxiosResponse(response);
     } catch (error: unknown) {
         return handleApiException(error);

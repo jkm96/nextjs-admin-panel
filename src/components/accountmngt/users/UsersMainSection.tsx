@@ -60,8 +60,8 @@ export default function UsersMainSection({query}: { query: string; }) {
      * fetch user data from api
      * @param queryParams
      */
-    const fetchUsers = (queryParams: UserQueryParameters) => {
-        getUsers(queryParams)
+    const fetchUsers = async (queryParams: UserQueryParameters) => {
+        await getUsers(queryParams)
             .then((response) => {
                 if (response.statusCode === 200) {
                     const parsedData = response.data;
