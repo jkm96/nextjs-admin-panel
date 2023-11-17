@@ -1,5 +1,6 @@
 import {LoginUserRequest, RegisterUserRequest} from "@/boundary/interfaces/auth";
 import {CreateUserRequest} from "@/boundary/interfaces/user";
+import {CreateRoleRequest} from "@/boundary/interfaces/role";
 
 export function isEmailValid (email: string): boolean{
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -124,6 +125,31 @@ export function validateLoginFormInputErrors(formData: LoginUserRequest) {
     // Check if there are any errors and return null if all input is valid
     for (const key in errors) {
         if (errors[key as keyof LoginUserRequest] !== "") {
+            return errors;
+        }
+    }
+
+    return null;
+}
+
+export function validateCreateRoleFormInputErrors(formData: CreateRoleRequest) {
+    const errors:CreateRoleRequest = {
+        description: "", name: "", roleClaims: []
+    }
+
+    if (formData.name.trim() === "") {
+        errors.name = "Role name cannot be empty";
+    } else if (formData.name.trim().length < 4) {
+        errors.name = "Role name must be at least 4 characters long";
+    }
+
+    if (formData.description.trim() === "") {
+        errors.description = "Role description cannot be empty";
+    }
+
+    // Check if there are any errors and return null if all input is valid
+    for (const key in errors) {
+        if (key !== 'roleClaims' && errors[key as keyof CreateRoleRequest] !== "") {
             return errors;
         }
     }

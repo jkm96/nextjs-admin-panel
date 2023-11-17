@@ -4,7 +4,6 @@ import {getUserPackedPermissions} from "@/lib/jwt/readAuthToken";
 import {Permission} from "@/boundary/interfaces/permission";
 
 export async function hasRequiredPermissions(requiredPermissions: string[]): Promise<boolean> {
-    //TODO get packed permissions string from auth token
     const response = await getAccessToken();
     if (response.statusCode === 200) {
         const tokenResponse = response.data;

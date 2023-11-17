@@ -13,7 +13,7 @@ const roleTableColumns = [
     {name: "ID", uid: "id", sortable: true},
     {name: "NAME", uid: "name", sortable: true},
     {name: "DESCRIPTION", uid: "description", sortable: true},
-    {name: "CREATED ON", uid: "CreatedOn", sortable: true},
+    {name: "CREATED ON", uid: "createdOn", sortable: true},
     {name: "ACTIONS", uid: "actions"},
 ];
 

@@ -22,6 +22,7 @@ import {ChevronDownIcon} from "@/components/shared/icons/ChevronDownIcon";
 import {EyeFilledIcon} from "@nextui-org/shared-icons";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import ApproveNewUserModal from "@/components/accountmngt/users/modals/ApproveNewUserModal";
+import ApproveNewRoleModal from "@/components/accountmngt/roles/modals/ApproveNewRoleModal";
 
 const StagedRecords = ({query}: { query: string; }) => {
     const [selectedModule, setSelectedModule] = useState(AppModulesDict[0].name);
@@ -116,6 +117,15 @@ const StagedRecords = ({query}: { query: string; }) => {
             case MapPermission(AdminPortalPermission.PermissionsUsersCreate):
                 return (
                     <ApproveNewUserModal
+                        stagingRecord={stagingRecord}
+                        isOpen={isOpen}
+                        onClose={handleCloseModal}
+                    />
+                );
+
+            case MapPermission(AdminPortalPermission.PermissionsRolesCreate):
+                return (
+                    <ApproveNewRoleModal
                         stagingRecord={stagingRecord}
                         isOpen={isOpen}
                         onClose={handleCloseModal}

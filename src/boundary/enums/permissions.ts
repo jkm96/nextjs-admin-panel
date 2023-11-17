@@ -47,14 +47,14 @@ enum AdminPortalPermission {
     PermissionsAuditTrailsExport = 401,
     PermissionsAuditTrailsSearch = 402,
 
-    // Staging Records
-    PermissionsStagingRecordsView = 450,
-    PermissionsStagingRecordsSearch = 451,
-
     // SecurityPolicy
     PermissionsSecurityPolicyView = 450,
     PermissionsSecurityPolicyApprove = 451,
     PermissionsSecurityPolicyEdit = 452,
+
+    // Staging Records
+    PermissionsStagingRecordsView = 500,
+    PermissionsStagingRecordsSearch = 501,
 
     // SuperAdmin
     PermissionsAccessAll = 9998,

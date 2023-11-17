@@ -1,4 +1,4 @@
-import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, User} from "@nextui-org/react";
+import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/react";
 import {VerticalDotsIcon} from "@/components/shared/icons/VerticalDotsIcon";
 import React from "react";
 import {RoleResponse} from "@/boundary/interfaces/role";

@@ -1,11 +1,11 @@
 "use client";
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import {hasRequiredPermissions} from "@/helpers/permissionsHelper";
 import Authorizing from "@/components/common/auth/Authorizing";
 import PermissionDeniedMessage from "@/components/common/auth/PermissionDeniedMessage";
 
-const AuthorizeComponent = (requiredPermissions:any) => (WrappedComponent:any) => {
-    const AuthComponent = (props:any) => {
+const AuthorizeComponent = (requiredPermissions: any) => (WrappedComponent: any) => {
+    const AuthComponent = (props: any) => {
         const [hasPermission, setHasPermission] = useState(false);
         const [loading, setLoading] = useState(true);
 
@@ -17,10 +17,9 @@ const AuthorizeComponent = (requiredPermissions:any) => (WrappedComponent:any) =
                 } catch (error) {
                     console.error("Permission check failed:", error);
                     setHasPermission(false)
-
-            } finally {
-                setLoading(false);
-            }
+                } finally {
+                    setLoading(false);
+                }
             };
 
             checkPermissions();
@@ -31,7 +30,7 @@ const AuthorizeComponent = (requiredPermissions:any) => (WrappedComponent:any) =
         }
 
         if (!hasPermission) {
-            return <PermissionDeniedMessage />;
+            return <PermissionDeniedMessage/>;
         }
 
         return <WrappedComponent {...props} />;

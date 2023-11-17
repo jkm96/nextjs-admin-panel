@@ -141,7 +141,7 @@ export default function CreateUserModal({isOpen, onClose}: {
             approverId: user?.id,
             action: MapPermission(AdminPortalPermission.PermissionsUsersCreate),
             status: StagingRecordStatus.Pending,
-            comments: "Request for data add"
+            comments: "Request to add new user data"
         };
         console.log("upsert user request", stagingRequest)
         let response = await upsertStagingRecord(stagingRequest);
