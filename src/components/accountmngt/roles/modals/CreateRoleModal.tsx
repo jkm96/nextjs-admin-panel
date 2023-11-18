@@ -1,14 +1,11 @@
 import React, {useEffect, useState} from "react";
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input} from "@nextui-org/react";
-import {createRole, getRegisteredPermissions} from "@/lib/services/accountmngt/roleService";
+import {Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/react";
+import {getRegisteredPermissions} from "@/lib/services/accountmngt/roleService";
 import {toast} from "react-toastify";
 import {Permission} from "@/boundary/interfaces/permission";
 import {groupPermissionsByGroup} from "@/helpers/permissionsHelper";
-import {MailIcon} from "@/components/shared/icons/MailIcon";
-import PersonIcon from "@/components/shared/icons/PersonIcon";
-import {CreateUserRequest} from "@/boundary/interfaces/user";
 import {CreateRoleRequest} from "@/boundary/interfaces/role";
-import {validateCreateRoleFormInputErrors, validateCreateUserFormInputErrors} from "@/helpers/validationHelpers";
+import {validateCreateRoleFormInputErrors} from "@/helpers/validationHelpers";
 import {StagingRecordStatus, StagingUpsertRequest} from "@/boundary/interfaces/staging";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import {useAuth} from "@/hooks/useAuth";
@@ -37,11 +34,8 @@ export default function CreateRoleModal({isOpen, onClose}: {
         await getRegisteredPermissions()
             .then((response) => {
                 if (response.statusCode === 200) {
-                    const permissionData = response.data;
-                    console.log("permissionData", permissionData)
-                    const permissions: Permission[] = permissionData;
+                    const permissions: Permission[] = response.data;
                     const groupedPermissions = groupPermissionsByGroup(permissions);
-                    console.log("groupedPermissions", groupedPermissions);
                     setGroupedPermissions(groupedPermissions);
                 }
             })
@@ -78,8 +72,6 @@ export default function CreateRoleModal({isOpen, onClose}: {
             ...createRoleFormData,
             roleClaims: selectedPermissions
         })
-        console.log("selected permissions", selectedPermissions)
-        console.log("selected createRoleFormData", createRoleFormData)
     }, [selectedPermissions]);
 
     const handleChange = (e: any) => {
@@ -123,8 +115,6 @@ export default function CreateRoleModal({isOpen, onClose}: {
             status: StagingRecordStatus.Pending,
             comments: "Request to add new role data"
         };
-        console.log("create role request", stagingRequest)
-
         const response = await upsertStagingRecord(stagingRequest)
         if (response.statusCode === 200) {
             const auditRequest: AuditRecordRequest = {

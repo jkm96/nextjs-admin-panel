@@ -38,3 +38,8 @@ export interface UserResponse {
     createdOn: Date;
     isDeleted: boolean;
 }
+
+export interface UpdateUserRolesRequest{
+    userId: string;
+    userRoles: UserRoleModel[];
+}

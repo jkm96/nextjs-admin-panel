@@ -39,7 +39,6 @@ export default function CreateUserModal({isOpen, onClose}: {
     const {user} = useAuth();
     const [roleList, setRoleList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [backendError, setBackendError] = useState("");
     const [createUserFormData, setCreateUserFormData] = useState<CreateUserRequest>(initialFormState);
     const [inputErrors, setInputErrors] = useState({
         email: "", lastName: "",phoneNumber: "",
@@ -70,7 +69,7 @@ export default function CreateUserModal({isOpen, onClose}: {
                     }
                 })
                 .catch((error) => {
-                    console.error(`Error fetching roles: ${error}`);
+                    toast.error(`Error fetching roles: ${error}`);
                 });
         }
     }, [isOpen]);
@@ -93,7 +92,6 @@ export default function CreateUserModal({isOpen, onClose}: {
 
     const handleUserCreationSubmit = async (e: any) => {
         e.preventDefault();
-        setBackendError("");
         setIsSubmitting(true)
 
         const inputErrors = validateCreateUserFormInputErrors(createUserFormData);
@@ -148,7 +146,7 @@ export default function CreateUserModal({isOpen, onClose}: {
                 module: ApplicationModule.Users,
                 comment: "",
                 dataAfter:  JSON.stringify(dataAfter),
-                dataBefore: JSON.stringify(dataAfter),
+                dataBefore: JSON.stringify(initialFormState),
                 description: `Initiated creation of user ${createUserFormData.email}`,
             }
             await addAuditRecord(auditRequest);

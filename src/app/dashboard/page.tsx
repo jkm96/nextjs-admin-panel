@@ -2,18 +2,15 @@
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import AuthorizeComponent from "@/components/common/auth/AuthorizeComponent";
 import DashboardSection from "@/components/dashboard/DashboardSection";
-import {useEffect} from "react";
-import visitAuditing from "@/helpers/auditHelpers";
+import VisitAuditing from "@/components/common/audit/VisitAuditing";
 
 function DashboardPage() {
-    console.log("Executing useEffect");
-    useEffect(() => {
-        async function trackPage() {
-            await visitAuditing("dashboard")
-        }
-        trackPage();
-    }, []);
-    return   <DashboardSection/>
+    return (
+        <>
+            <VisitAuditing page={"dashboard"}/>
+            <DashboardSection/>
+        </>
+    )
 }
 
 

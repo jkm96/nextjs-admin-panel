@@ -55,3 +55,20 @@ export async function getUserById(userId: string) {
         throw error;
     }
 }
+export async function getUserRoles(userId: string) {
+    try {
+        const apiUrl = `${internalBaseUrl}/users/userroles/${userId}`;
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'x-api-key': apiKey,
+                'Content-type': 'application/json',
+            },
+            body: null,
+        });
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}
