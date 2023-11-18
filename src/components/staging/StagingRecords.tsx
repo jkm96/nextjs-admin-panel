@@ -23,6 +23,7 @@ import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions
 import ApproveNewUserModal from "@/components/accountmngt/users/modals/ApproveNewUserModal";
 import ApproveNewRoleModal from "@/components/accountmngt/roles/modals/ApproveNewRoleModal";
 import {toast} from "react-toastify";
+import ApproveUpdateUserModal from "@/components/accountmngt/users/modals/ApproveUpdateUserModal";
 
 const StagedRecords = ({query}: { query: string; }) => {
     const [selectedModule, setSelectedModule] = useState(AppModulesDict[0].name);
@@ -67,6 +68,7 @@ const StagedRecords = ({query}: { query: string; }) => {
         queryParams.action = selectedActionValue;
         queryParams.status = StagingRecordStatus.Pending;
         queryParams.searchTerm = query;
+        console.log("queryParams", queryParams)
         fetchStagedRecords(queryParams);
     }, [currentPage, selectedModule, selectedAction, query]);
 
@@ -117,6 +119,15 @@ const StagedRecords = ({query}: { query: string; }) => {
             case MapPermission(AdminPortalPermission.PermissionsUsersCreate):
                 return (
                     <ApproveNewUserModal
+                        stagingRecord={stagingRecord}
+                        isOpen={isOpen}
+                        onClose={handleCloseModal}
+                    />
+                );
+
+                case MapPermission(AdminPortalPermission.PermissionsUsersEdit):
+                return (
+                    <ApproveUpdateUserModal
                         stagingRecord={stagingRecord}
                         isOpen={isOpen}
                         onClose={handleCloseModal}

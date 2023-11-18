@@ -1,6 +1,8 @@
+import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
+
 const UserModuleActions = [
-    { name: "New", permission: "PermissionsUsersCreate" },
-    { name: "Edits", permission: "PermissionsUsersEdit" },
+    { name: "New", permission: MapPermission(AdminPortalPermission.PermissionsUsersCreate)},
+    { name: "Edits", permission: MapPermission(AdminPortalPermission.PermissionsUsersEdit) },
     { name: "Deletions", permission: "PermissionsUsersDelete" },
     { name: "Activations", permission: "PermissionsUsersActivate" },
     { name: "Deactivations", permission: "PermissionsUsersDeactivate" },

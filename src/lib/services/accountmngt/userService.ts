@@ -1,6 +1,6 @@
 import {apiKey, internalBaseUrl} from "@/boundary/constants/appConstants";
 import {UserQueryParameters} from "@/boundary/parameters/userQueryParameters";
-import {CreateUserRequest} from "@/boundary/interfaces/user";
+import {CreateUserRequest, UpdateUserRequest} from "@/boundary/interfaces/user";
 
 export async function getUsers(queryParams: UserQueryParameters) {
     try {
@@ -30,6 +30,23 @@ export async function createUser(createUserRequest: CreateUserRequest) {
                 'Content-type': 'application/json',
             },
             body: JSON.stringify(createUserRequest),
+        });
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function updateUser(updateUserRequest: UpdateUserRequest) {
+    try {
+        const response = await fetch(`${internalBaseUrl}/users/update`, {
+            method: 'POST',
+            headers: {
+                'x-api-key': `${apiKey}`,
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(updateUserRequest),
         });
 
         return response.json();
