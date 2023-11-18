@@ -22,6 +22,7 @@ import {EyeFilledIcon} from "@nextui-org/shared-icons";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import ApproveNewUserModal from "@/components/accountmngt/users/modals/ApproveNewUserModal";
 import ApproveNewRoleModal from "@/components/accountmngt/roles/modals/ApproveNewRoleModal";
+import {toast} from "react-toastify";
 
 const StagedRecords = ({query}: { query: string; }) => {
     const [selectedModule, setSelectedModule] = useState(AppModulesDict[0].name);
@@ -52,7 +53,7 @@ const StagedRecords = ({query}: { query: string; }) => {
                 }
             })
             .catch((error) => {
-                console.error(`Error fetching staged records: ${error}`);
+                toast.error(`Error fetching staged records: ${error}`);
             })
             .finally(() => {
                 setIsLoading(false);

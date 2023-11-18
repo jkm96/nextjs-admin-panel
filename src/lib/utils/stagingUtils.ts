@@ -3,7 +3,7 @@ const UserModuleActions = [
     { name: "Edits", permission: "PermissionsUsersEdit" },
     { name: "Deletions", permission: "PermissionsUsersDelete" },
     { name: "Activations", permission: "PermissionsUsersActivate" },
-    { name: "De-Activations", permission: "PermissionsUsersDeactivate" },
+    { name: "Deactivations", permission: "PermissionsUsersDeactivate" },
 ];
 
 const RoleModuleActions = [

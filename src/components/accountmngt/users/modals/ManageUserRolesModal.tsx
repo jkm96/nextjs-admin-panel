@@ -120,7 +120,6 @@ export default function ManageUserRolesModal({userCurrentRoles, userDetails, isO
             status: StagingRecordStatus.Pending,
             comments: "Request to update user roles"
         };
-        console.log("stagingRequest", stagingRequest)
         let response = await upsertStagingRecord(stagingRequest);
 
         if (response.statusCode === 200) {

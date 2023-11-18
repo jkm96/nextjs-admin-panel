@@ -7,18 +7,14 @@ import {
     Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow
 } from "@nextui-org/react";
 import PersonIcon from "@/components/shared/icons/PersonIcon";
-import {UserResponse} from "@/boundary/interfaces/user";
+import {ToggleUserStatusRequest, UpdateUserRequest, UserResponse} from "@/boundary/interfaces/user";
 import {MailIcon} from "@/components/shared/icons/MailIcon";
 import {CheckIcon} from "@/components/shared/icons/CheckIcon";
 import {CrossIcon} from "@/components/shared/icons/CrossIcon";
 import {RoleResponse} from "@/boundary/interfaces/role";
-import {RoleQueryParameters} from "@/boundary/parameters/roleQueryParameters";
-import {getRoles} from "@/lib/services/accountmngt/roleService";
-import SearchComponent from "@/components/common/filter/SearchComponent";
-import {PlusIcon} from "@/components/shared/icons/PlusIcon";
-import CreateUserModal from "@/components/accountmngt/users/modals/CreateUserModal";
-import {PencilIcon} from "@/components/shared/icons/PencilIcon";
 import ManageUserRolesModal from "@/components/accountmngt/users/modals/ManageUserRolesModal";
+import UpdateUserModal from "@/components/accountmngt/users/modals/UpdateUserModal";
+import ToggleUserModal from "@/components/accountmngt/users/modals/ToggleUserModal";
 
 const initialUserData: UserResponse = {
     changePasswordOnLogin: false,
@@ -41,21 +37,21 @@ export default function ManageUserSection({userId}: { userId: string }) {
     const [userRoleList, setUserRoleList] = useState<RoleResponse[]>([]);
     const [isLoadingUser, setIsLoadingUser] = useState(true);
     const [isLoadingRoles, setIsLoadingRoles] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [inputErrors, setInputErrors] = useState({
-        email: "", lastName: "", phoneNumber: "",
-        firstName: "", userName: ""
-    });
     const isActive = userDetails.isActive === 'active';
     const isEmailConfirmed = userDetails.emailConfirmed === 'confirmed';
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modals, setModals] = useState({
+        updateUserRoles: false,
+        updateUser: false,
+        toggleUser: false,
+        resendEmailConfirmation: false,
+    });
 
-    const handleOpenModal = () => {
-        setIsModalOpen(true);
+    const openModal = (modalName: string) => {
+        setModals({ ...modals, [modalName]: true });
     };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
+    const closeModal = (modalName: string) => {
+        setModals({ ...modals, [modalName]: false });
     };
     const fetchUserDetails = async (userId: string) => {
         setIsLoadingUser(true);
@@ -81,7 +77,6 @@ export default function ManageUserSection({userId}: { userId: string }) {
             .then((response) => {
                 if (response.statusCode === 200) {
                     const parsedData = response.data;
-                    console.log("user roles", parsedData)
                     setUserRoleList(parsedData)
                 }
             })
@@ -93,191 +88,193 @@ export default function ManageUserSection({userId}: { userId: string }) {
             });
     }, [userId]);
 
-    const handleChange = (e: any) => {
-        const {name, value} = e.target;
-        setUserDetails({...userDetails, [name]: value});
+    const updateUserRequest: UpdateUserRequest = {
+        userId: userDetails.id,
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+        phoneNumber: userDetails.phoneNumber,
+        userName: userDetails.userName
     }
-
-    const handleUserEditSubmit = async (e: any) => {
+    const toggleUserStatusRequest: ToggleUserStatusRequest = {
+        activateUser: isActive,
+        email: userDetails.email,
+        userId: userDetails.id
     }
 
     return (
         <>
+            {!isLoadingUser && !isLoadingRoles && (
+                <>
+                    <h3>Actions</h3>
+
+                    <div className="grid md:grid-cols-4 md:gap-4 mb-2">
+
+                        <Button onPress={() => openModal("updateUser")} color="primary" variant="shadow">
+                            Edit User
+                        </Button>
+                        <UpdateUserModal
+                            updateUserRequest={updateUserRequest}
+                            userEmail={userDetails.email}
+                            isOpen={modals.updateUser}
+                            onClose={() => closeModal("updateUser")}
+                        />
+
+                        <Button onPress={() => openModal("updateUserRoles")} color="primary" variant="shadow">
+                            Update Roles
+                        </Button>
+                        <ManageUserRolesModal
+                            userCurrentRoles={userRoleList}
+                            userDetails={userDetails}
+                            isOpen={modals.updateUserRoles}
+                            onClose={() => closeModal("updateUserRoles")}
+                        />
+
+                        <Button
+                            onPress={() => openModal("toggleUser")}
+                            color={isActive ? 'danger' : 'primary'}
+                            variant="shadow">
+                            {isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                        <ToggleUserModal
+                            toggleUserStatusRequest={toggleUserStatusRequest}
+                            isOpen={modals.toggleUser}
+                            onClose={() => closeModal("toggleUser")}
+                        />
+
+                    </div>
+                </>
+            )}
             {isLoadingUser ? (
-                <p>Loading user details...</p>
+                <div className={"text-center"}>
+                    <p>Loading user details...</p>
+                </div>
             ) : (
                 <>
                     <h3>User Details</h3>
-                    <form onSubmit={handleUserEditSubmit}>
-                        <div className="grid md:grid-cols-3 md:gap-4">
-                            <Input type="email"
-                                   className="mt-2 mb-1 "
-                                   defaultValue={userDetails.email}
-                                   label="Email"
-                                   endContent={
-                                       <MailIcon
-                                           className="fill-current"/>
-                                   }
-                                   readOnly={true}
-                                   variant={"bordered"}
-                            />
 
-                            <Input type="email"
-                                   className="mt-2 mb-1 "
-                                   defaultValue={userDetails.createdOn.toString()}
-                                   label="Created On"
-                                   endContent={
-                                       <PersonIcon
-                                           className="fill-current"/>
-                                   }
-                                   readOnly={true}
-                                   variant={"bordered"}
-                            />
+                    <div className="grid md:grid-cols-3 md:gap-4">
+                        <Input type="email"
+                               className="mt-2 mb-1 "
+                               defaultValue={userDetails.email}
+                               label="Email"
+                               endContent={
+                                   <MailIcon
+                                       className="fill-current"/>
+                               }
+                               readOnly={true}
+                               variant={"bordered"}
+                        />
 
-                            <Input type="text"
-                                   onChange={handleChange}
-                                   value={userDetails.userName}
-                                   label="Username"
-                                   name="userName"
-                                   className="mt-2 mb-1 "
-                                   variant={"bordered"}
-                                   placeholder="Enter username"
-                                   endContent={
-                                       <PersonIcon
-                                           className="fill-current"/>
-                                   }
-                                   onInput={() => {
-                                       setInputErrors({...inputErrors, userName: ""});
-                                   }}
-                                   isInvalid={inputErrors.userName !== ""}
-                                   errorMessage={inputErrors.userName}/>
-                        </div>
+                        <Input type="email"
+                               className="mt-2 mb-1 "
+                               defaultValue={userDetails.createdOn.toString()}
+                               label="Created On"
+                               endContent={
+                                   <PersonIcon
+                                       className="fill-current"/>
+                               }
+                               readOnly={true}
+                               variant={"bordered"}
+                        />
 
-                        <div className="grid md:grid-cols-3 md:gap-4">
-                            <Input type="text"
-                                   onChange={handleChange}
-                                   value={userDetails.firstName}
-                                   label="FirstName"
-                                   name="firstName"
-                                   endContent={
-                                       <PersonIcon
-                                           className="fill-current"/>
-                                   }
-                                   variant={"bordered"}
-                                   className="mt-2 mb-1 "
-                                   placeholder="Enter firstName"
-                                   onInput={() => {
-                                       setInputErrors({...inputErrors, firstName: ""});
-                                   }}
-                                   isInvalid={inputErrors.firstName !== ""}
-                                   errorMessage={inputErrors.firstName}/>
+                        <Input type="text"
+                               defaultValue={userDetails.userName}
+                               label="Username"
+                               name="userName"
+                               className="mt-2 mb-1 "
+                               variant={"bordered"}
+                               endContent={
+                                   <PersonIcon
+                                       className="fill-current"/>
+                               }/>
+                    </div>
 
-                            <Input type="text"
-                                   onChange={handleChange}
-                                   value={userDetails.lastName}
-                                   label="Lastname"
-                                   name="lastName"
-                                   endContent={
-                                       <PersonIcon
-                                           className="fill-current"/>
-                                   }
-                                   variant={"bordered"}
-                                   className="mt-2 mb-1 "
-                                   placeholder="Enter lastName"
-                                   onInput={() => {
-                                       setInputErrors({...inputErrors, lastName: ""});
-                                   }}
-                                   isInvalid={inputErrors.lastName !== ""}
-                                   errorMessage={inputErrors.lastName}/>
+                    <div className="grid md:grid-cols-3 md:gap-4">
+                        <Input type="text"
+                               defaultValue={userDetails.firstName}
+                               label="FirstName"
+                               name="firstName"
+                               endContent={
+                                   <PersonIcon
+                                       className="fill-current"/>
+                               }
+                               variant={"bordered"}
+                               className="mt-2 mb-1 "/>
 
-                            <Input type="text"
-                                   onChange={handleChange}
-                                   value={userDetails.phoneNumber ?? ""}
-                                   label="PhoneNumber"
-                                   name="phoneNumber"
-                                   endContent={
-                                       <PersonIcon
-                                           className="fill-current"/>
-                                   }
-                                   variant={"bordered"}
-                                   className="mt-2 mb-1 "
-                                   placeholder="Enter phone number"
-                                   onInput={() => {
-                                       setInputErrors({...inputErrors, phoneNumber: ""});
-                                   }}
-                                   isInvalid={inputErrors.phoneNumber !== ""}
-                                   errorMessage={inputErrors.phoneNumber}/>
-                        </div>
+                        <Input type="text"
+                               defaultValue={userDetails.lastName}
+                               label="Lastname"
+                               name="lastName"
+                               endContent={
+                                   <PersonIcon
+                                       className="fill-current"/>
+                               }
+                               variant={"bordered"}
+                               className="mt-2 mb-1 "/>
 
-                        <div className="flex justify-end mt-4 gap-1">
-                            <Button color="primary"
-                                    type="submit"
-                                    // startContent={<PencilIcon/>}
-                                    onClick={handleUserEditSubmit}
-                            >
-                                {isSubmitting ? "Submitting..." : "Edit User"}
-                            </Button>
-                        </div>
+                        <Input type="text"
+                               defaultValue={userDetails.phoneNumber ?? ""}
+                               label="PhoneNumber"
+                               name="phoneNumber"
+                               endContent={
+                                   <PersonIcon
+                                       className="fill-current"/>
+                               }
+                               variant={"bordered"}
+                               className="mt-2 mb-1 "/>
+                    </div>
 
-                        <h3 className="mt-4">User Status</h3>
+                    <h3 className="mt-4">User Status</h3>
 
-                        <div className="flex gap-4 py-4">
-                            <Chip
-                                startContent={isActive ? <CheckIcon size={18}/> : <CrossIcon size={18}/>}
-                                variant="light"
-                                color={isActive ? 'success' : 'danger'}
-                            >
-                                Active Status
-                            </Chip>
+                    <div className="flex gap-4 py-4 mt-2">
+                        <Chip
+                            startContent={isActive ? <CheckIcon size={18}/> : <CrossIcon size={18}/>}
+                            variant="light"
+                            color={isActive ? 'success' : 'danger'}
+                        >
+                            Active Status
+                        </Chip>
 
-                            <Chip
-                                startContent={isEmailConfirmed ? <CheckIcon size={18}/> : <CrossIcon size={18}/>}
-                                variant="light"
-                                color={isEmailConfirmed ? 'success' : 'danger'}
-                            >
-                                Email Confirmed
-                            </Chip>
+                        <Chip
+                            startContent={isEmailConfirmed ? <CheckIcon size={18}/> : <CrossIcon size={18}/>}
+                            variant="light"
+                            color={isEmailConfirmed ? 'success' : 'danger'}
+                        >
+                            Email Confirmed
+                        </Chip>
 
-                            <Chip
-                                startContent={userDetails.enableSmsOtp ? <CheckIcon size={18}/> :
-                                    <CrossIcon size={18}/>}
-                                variant="light"
-                                color={userDetails.enableSmsOtp ? 'success' : 'danger'}
-                            >
-                                SmsOtp Enabled
-                            </Chip>
+                        <Chip
+                            startContent={userDetails.enableSmsOtp ? <CheckIcon size={18}/> :
+                                <CrossIcon size={18}/>}
+                            variant="light"
+                            color={userDetails.enableSmsOtp ? 'success' : 'danger'}
+                        >
+                            SmsOtp Enabled
+                        </Chip>
 
-                            <Chip
-                                startContent={userDetails.enableEmailOtp ? <CheckIcon size={18}/> :
-                                    <CrossIcon size={18}/>}
-                                variant="light"
-                                color={userDetails.enableEmailOtp ? 'success' : 'danger'}
-                            >
-                                EmailOtp Enabled
-                            </Chip>
-                        </div>
-
-                    </form>
+                        <Chip
+                            startContent={userDetails.enableEmailOtp ? <CheckIcon size={18}/> :
+                                <CrossIcon size={18}/>}
+                            variant="light"
+                            color={userDetails.enableEmailOtp ? 'success' : 'danger'}
+                        >
+                            EmailOtp Enabled
+                        </Chip>
+                    </div>
                 </>
             )}
 
             {isLoadingRoles ? (
-                <p>Loading user roles...</p>
+                <div className={"text-center"}>
+                    <p>Loading user roles...</p>
+                </div>
             ) : (
                 <>
-                    <h3>User Roles</h3>
+                    <h3 className={"mt-2"}>User Roles</h3>
 
-                    <div className="flex justify-end mt-1 mb-4 gap-1">
-                        <Button onPress={handleOpenModal}
-                                // startContent={<PencilIcon/>}
-                                color="primary"
-                                variant="shadow">
-                            Update Roles
-                        </Button>
-                        <ManageUserRolesModal userCurrentRoles={userRoleList} userDetails={userDetails} isOpen={isModalOpen} onClose={handleCloseModal}/>
-                    </div>
-
-                    <Table aria-label="Example table with dynamic content">
+                    <Table
+                        className={"mt-2"}
+                        aria-label="Example table with dynamic content">
                         <TableHeader>
                             <TableColumn>Name</TableColumn>
                             <TableColumn>Description</TableColumn>

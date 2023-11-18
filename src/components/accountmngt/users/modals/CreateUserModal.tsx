@@ -101,17 +101,6 @@ export default function CreateUserModal({isOpen, onClose}: {
             return;
         }
 
-        if (
-            createUserFormData.email.trim() === "" ||
-            createUserFormData.userName.trim() === "" ||
-            createUserFormData.firstName.trim() === "" ||
-            createUserFormData.lastName.trim() === ""||
-            createUserFormData.phoneNumber.trim() === ""
-        ) {
-            setIsSubmitting(false)
-            return;
-        }
-
         if (!createUserFormData.userRolesList.some((role) => role.selected)) {
             setIsSubmitting(false);
             toast.error("Please select at least one role.");
@@ -161,6 +150,7 @@ export default function CreateUserModal({isOpen, onClose}: {
     };
 
     const handleCloseModal = () => {
+        setIsSubmitting(false)
         setCreateUserFormData(initialFormState);
     };
 

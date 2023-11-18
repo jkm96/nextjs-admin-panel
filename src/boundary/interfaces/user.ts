@@ -15,6 +15,14 @@ export interface CreateUserRequest{
     userRolesList: UserRoleModel[];
 }
 
+export interface UpdateUserRequest{
+    userId: string;
+    firstName: string;
+    lastName: string;
+    userName: string;
+    phoneNumber: string;
+}
+
 export interface UserRoleModel {
     roleName: string;
     roleId: string;
@@ -30,7 +38,7 @@ export interface UserResponse {
     email: string;
     isActive: string;
     emailConfirmed: string;
-    phoneNumber: string | null;
+    phoneNumber: string;
     profilePictureDataUrl: string | null;
     enableEmailOtp: boolean;
     enableSmsOtp: boolean;
@@ -42,4 +50,10 @@ export interface UserResponse {
 export interface UpdateUserRolesRequest{
     userId: string;
     userRoles: UserRoleModel[];
+}
+
+export interface ToggleUserStatusRequest {
+    activateUser: boolean;
+    userId: string;
+    email: string;
 }

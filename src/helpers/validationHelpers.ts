@@ -1,17 +1,17 @@
 import {LoginUserRequest, RegisterUserRequest} from "@/boundary/interfaces/auth";
-import {CreateUserRequest} from "@/boundary/interfaces/user";
+import {CreateUserRequest, UpdateUserRequest, UserResponse} from "@/boundary/interfaces/user";
 import {CreateRoleRequest} from "@/boundary/interfaces/role";
 
-export function isEmailValid (email: string): boolean{
+export function isEmailValid(email: string): boolean {
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     return emailPattern.test(email);
 }
 
 export function validateRegisterFormInputErrors(formData: RegisterUserRequest) {
-    const errors:RegisterUserRequest = {
-        email: "",   lastName: "",
-        firstName: "", password: "",confirmPassword: ""
+    const errors: RegisterUserRequest = {
+        email: "", lastName: "",
+        firstName: "", password: "", confirmPassword: ""
     }
 
     if (formData.email.trim() === "") {
@@ -57,11 +57,11 @@ export function validateRegisterFormInputErrors(formData: RegisterUserRequest) {
 }
 
 export function validateCreateUserFormInputErrors(createUserFormData: CreateUserRequest) {
-    const errors:CreateUserRequest = {
+    const errors: CreateUserRequest = {
         userRolesList: [],
-        email: "",   lastName: "",
+        email: "", lastName: "",
         firstName: "", userName: "",
-        phoneNumber:""
+        phoneNumber: ""
     }
 
     if (createUserFormData.email.trim() === "") {
@@ -104,8 +104,48 @@ export function validateCreateUserFormInputErrors(createUserFormData: CreateUser
     return null;
 }
 
+export function validateUpdateUserFormInputErrors(updateUserRequest: UpdateUserRequest) {
+    const errors: UpdateUserRequest = {
+        lastName: "", firstName: "", userName: "", phoneNumber: ""
+    }
+
+    if (updateUserRequest.firstName.trim() === "") {
+        errors.firstName = "FirstName cannot be empty";
+    } else if (updateUserRequest.firstName.trim().length < 4) {
+        errors.firstName = "FirstName must be at least 4 characters long";
+    }
+
+    if (updateUserRequest.lastName.trim() === "") {
+        errors.lastName = "LastName cannot be empty";
+    } else if (updateUserRequest.lastName.trim().length < 4) {
+        errors.lastName = "LastName must be at least 4 characters long";
+    }
+
+    if (updateUserRequest.userName.trim() === "") {
+        errors.userName = "userName cannot be empty";
+    } else if (updateUserRequest.userName.trim().length < 5) {
+        errors.userName = "userName must be at least 4 characters long";
+    }
+
+    if (updateUserRequest.phoneNumber.trim() === "") {
+        errors.phoneNumber = "Phone Number cannot be empty";
+    } else if (updateUserRequest.phoneNumber.trim().length < 8 || updateUserRequest.phoneNumber.trim().length > 13) {
+        errors.phoneNumber = "Phone Number must be between 8-13 characters long";
+    }
+
+    // Check if there are any errors and return null if all input is valid
+    for (const key in errors) {
+        if (errors[key as keyof UpdateUserRequest] !== "") {
+            return errors;
+        }
+    }
+
+    return null;
+}
+
+
 export function validateLoginFormInputErrors(formData: LoginUserRequest) {
-    const errors:LoginUserRequest = {
+    const errors: LoginUserRequest = {
         email: "",
         password: "",
     }
@@ -133,7 +173,7 @@ export function validateLoginFormInputErrors(formData: LoginUserRequest) {
 }
 
 export function validateCreateRoleFormInputErrors(formData: CreateRoleRequest) {
-    const errors:CreateRoleRequest = {
+    const errors: CreateRoleRequest = {
         description: "", name: "", roleClaims: []
     }
 
