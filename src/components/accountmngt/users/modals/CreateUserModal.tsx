@@ -54,7 +54,9 @@ export default function CreateUserModal({isOpen, onClose}: {
                         const parsedData = response.data;
                         const {data} = parsedData;
 
-                        const mappedRoles = data.map((role: any) => ({
+                        const mappedRoles = data
+                            .filter((role: any) => role.name !== "Administrator")
+                            .map((role: any) => ({
                             roleName: role.name,
                             roleId: role.id,
                             roleDescription: role.description,
@@ -301,21 +303,20 @@ export default function CreateUserModal({isOpen, onClose}: {
                                             ))}
                                         </TableBody>
                                     </Table>
-                                    <div className="flex justify-end mt-4 gap-1">
-                                        <Button color="danger" variant="flat" onPress={onClose}>
-                                            Close
-                                        </Button>
-                                        <Button color="primary"
-                                                type="submit"
-                                                onClick={handleUserCreationSubmit}
-                                        >
-                                            {isSubmitting ? "Submitting..." : "Create User"}
-                                        </Button>
-                                    </div>
                                 </form>
                             </ModalBody>
                             <ModalFooter>
-
+                                <div className="flex justify-end mt-4 gap-1">
+                                    <Button color="danger" variant="flat" onPress={onClose}>
+                                        Close
+                                    </Button>
+                                    <Button color="primary"
+                                            type="submit"
+                                            onClick={handleUserCreationSubmit}
+                                    >
+                                        {isSubmitting ? "Submitting..." : "Create User"}
+                                    </Button>
+                                </div>
                             </ModalFooter>
                         </>
                     )}

@@ -25,6 +25,7 @@ import ApproveNewRoleModal from "@/components/accountmngt/roles/modals/ApproveNe
 import {toast} from "react-toastify";
 import ApproveUpdateUserModal from "@/components/accountmngt/users/modals/ApproveUpdateUserModal";
 import ApproveToggleUserModal from "@/components/accountmngt/users/modals/ApproveToggleUserModal";
+import ApproveEditUserRolesModal from "@/components/accountmngt/users/modals/ApproveEditUserRolesModal";
 
 const StagedRecords = ({query}: { query: string; }) => {
     const [selectedModule, setSelectedModule] = useState(AppModulesDict[0].name);
@@ -39,8 +40,8 @@ const StagedRecords = ({query}: { query: string; }) => {
         column: "name",
         direction: "ascending",
     });
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [selectedStagingRecord, setSelectedStagingRecord] = useState<StagingResponse|null>(null);
+    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const [selectedStagingRecord, setSelectedStagingRecord] = useState<StagingResponse | null>(null);
 
     const fetchStagedRecords = (queryParams: StagingQueryParameters) => {
         getStagedRecords(queryParams)
@@ -105,7 +106,7 @@ const StagedRecords = ({query}: { query: string; }) => {
         setSelectedActionValue(defaultAction.permission);
     };
 
-    const handleViewClick = (stagingRecord:StagingResponse|null) => {
+    const handleViewClick = (stagingRecord: StagingResponse | null) => {
         setSelectedStagingRecord(stagingRecord);
         onOpen();
     };
@@ -126,7 +127,7 @@ const StagedRecords = ({query}: { query: string; }) => {
                     />
                 );
 
-                case MapPermission(AdminPortalPermission.PermissionsUsersEdit):
+            case MapPermission(AdminPortalPermission.PermissionsUsersEdit):
                 return (
                     <ApproveUpdateUserModal
                         stagingRecord={stagingRecord}
@@ -135,7 +136,7 @@ const StagedRecords = ({query}: { query: string; }) => {
                     />
                 );
 
-                case MapPermission(AdminPortalPermission.PermissionsUsersActivate):
+            case MapPermission(AdminPortalPermission.PermissionsUsersActivate):
                 return (
                     <ApproveToggleUserModal
                         stagingRecord={stagingRecord}
@@ -144,9 +145,18 @@ const StagedRecords = ({query}: { query: string; }) => {
                     />
                 );
 
-                case MapPermission(AdminPortalPermission.PermissionsUsersDeactivate):
+            case MapPermission(AdminPortalPermission.PermissionsUsersDeactivate):
                 return (
                     <ApproveToggleUserModal
+                        stagingRecord={stagingRecord}
+                        isOpen={isOpen}
+                        onClose={handleCloseModal}
+                    />
+                );
+
+            case MapPermission(AdminPortalPermission.PermissionsUsersManageRoles):
+                return (
+                    <ApproveEditUserRolesModal
                         stagingRecord={stagingRecord}
                         isOpen={isOpen}
                         onClose={handleCloseModal}
@@ -261,8 +271,8 @@ const StagedRecords = ({query}: { query: string; }) => {
                                 <Button
                                     onClick={() => handleViewClick(stagingRecord)}
                                     startContent={<EyeFilledIcon/>}
-                                        color="primary"
-                                        variant="shadow">
+                                    color="primary"
+                                    variant="shadow">
                                     View
                                 </Button>
                             </TableCell>

@@ -24,7 +24,7 @@ export function handleApiException(error: any) {
             const errorData: any = axiosError.response?.data;
             const errorResponse = camelcaseKeys(errorData, {deep: true}) as AdminApiErrorResponse;
 
-            return createNextResponse(500, errorResponse.message, errorResponse)
+            return createNextResponse(axiosError.response?.status ?? 500, axiosError.response.statusText ?? errorResponse.message, errorResponse)
         }
 
         switch (axiosError.code) {

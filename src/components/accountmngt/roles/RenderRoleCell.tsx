@@ -2,10 +2,16 @@ import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@ne
 import {VerticalDotsIcon} from "@/components/shared/icons/VerticalDotsIcon";
 import React from "react";
 import {RoleResponse} from "@/boundary/interfaces/role";
+import Link from "next/link";
 
 export default function RenderRoleCell(role: RoleResponse, columnKey: string | number | bigint) {
     // @ts-ignore
     const cellValue = role[columnKey];
+    if (columnKey === "actions" && role.name.toLowerCase() === "administrator") {
+        // Don't render actions for the "Administrator" role
+        return null;
+    }
+
     switch (columnKey) {
         case "actions":
             return (
@@ -17,7 +23,9 @@ export default function RenderRoleCell(role: RoleResponse, columnKey: string | n
                             </Button>
                         </DropdownTrigger>
                         <DropdownMenu>
-                            <DropdownItem>View</DropdownItem>
+                            <DropdownItem>
+                                <Link href={`/dashboard/roles/${role.id}`}>View</Link>
+                            </DropdownItem>
                             <DropdownItem>Edit</DropdownItem>
                             <DropdownItem>Delete</DropdownItem>
                         </DropdownMenu>

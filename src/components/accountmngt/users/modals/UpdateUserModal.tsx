@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {
     Button,
     Input,
@@ -6,18 +6,11 @@ import {
     ModalBody,
     ModalContent,
     ModalFooter,
-    ModalHeader,
-    Table, TableBody, TableCell, TableColumn,
-    useDisclosure, TableHeader, TableRow, Checkbox
+    ModalHeader
 } from "@nextui-org/react";
-import {PlusIcon} from "@/components/shared/icons/PlusIcon";
 import PersonIcon from "@/components/shared/icons/PersonIcon";
-import {getRoles} from "@/lib/services/accountmngt/roleService";
-import {RoleQueryParameters} from "@/boundary/parameters/roleQueryParameters";
-import {RoleResponse} from "@/boundary/interfaces/role";
-import {validateCreateUserFormInputErrors, validateUpdateUserFormInputErrors} from "@/helpers/validationHelpers";
-import {CreateUserRequest, UpdateUserRequest, UserRoleModel} from "@/boundary/interfaces/user";
-import {MailIcon} from "@/components/shared/icons/MailIcon";
+import {validateUpdateUserFormInputErrors} from "@/helpers/validationHelpers";
+import {UpdateUserRequest} from "@/boundary/interfaces/user";
 import {toast} from "react-toastify";
 import {upsertStagingRecord} from "@/lib/services/staging/stagingRecordService";
 import {StagingRecordStatus, StagingUpsertRequest} from "@/boundary/interfaces/staging";
@@ -28,7 +21,7 @@ import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 
 export default function UpdateUserModal({updateUserRequest, userEmail, isOpen, onClose}: {
     updateUserRequest: UpdateUserRequest,
-    userEmail:string
+    userEmail: string
     isOpen: boolean,
     onClose: () => void
 }) {
@@ -187,22 +180,20 @@ export default function UpdateUserModal({updateUserRequest, userEmail, isOpen, o
                                                isInvalid={inputErrors.phoneNumber !== ""}
                                                errorMessage={inputErrors.phoneNumber}/>
                                     </div>
-
-                                    <div className="flex justify-end mt-4 gap-1">
-                                        <Button color="danger" variant="flat" onPress={onClose}>
-                                            Close
-                                        </Button>
-                                        <Button color="primary"
-                                                type="submit"
-                                                onClick={handleUserUpdateSubmit}
-                                        >
-                                            {isSubmitting ? "Submitting..." : "Update User"}
-                                        </Button>
-                                    </div>
                                 </form>
                             </ModalBody>
                             <ModalFooter>
-
+                                <div className="flex justify-end mt-4 gap-1">
+                                    <Button color="danger" variant="flat" onPress={onClose}>
+                                        Close
+                                    </Button>
+                                    <Button color="primary"
+                                            type="submit"
+                                            onClick={handleUserUpdateSubmit}
+                                    >
+                                        {isSubmitting ? "Submitting..." : "Update User"}
+                                    </Button>
+                                </div>
                             </ModalFooter>
                         </>
                     )}

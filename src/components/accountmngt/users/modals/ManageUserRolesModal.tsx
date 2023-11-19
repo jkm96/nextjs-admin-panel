@@ -45,7 +45,9 @@ export default function ManageUserRolesModal({userCurrentRoles, userDetails, isO
                     const parsedData = response.data;
                     const {data} = parsedData;
 
-                    const mappedRoles = data.map((role: any) => ({
+                    const mappedRoles = data
+                        .filter((role: any) => role.name !== "Administrator")
+                        .map((role: any) => ({
                         roleName: role.name,
                         roleId: role.id,
                         roleDescription: role.description,
@@ -129,7 +131,7 @@ export default function ManageUserRolesModal({userCurrentRoles, userDetails, isO
                 comment: "",
                 dataAfter: JSON.stringify(updateUserRolesRequest),
                 dataBefore: JSON.stringify(dataBefore),
-                description: `Initiated update user roles for user ${userDetails.email}`,
+                description: `Initiated update roles for user ${userDetails.email}`,
             }
             await addAuditRecord(auditRequest);
             toast.success(response.message)
@@ -193,23 +195,22 @@ export default function ManageUserRolesModal({userCurrentRoles, userDetails, isO
                                                     ))}
                                                 </TableBody>
                                             </Table>
-                                            <div className="flex justify-end mt-4 gap-1">
-                                                <Button color="danger" variant="flat" onPress={onClose}>
-                                                    Close
-                                                </Button>
-                                                <Button color="primary"
-                                                        type="submit"
-                                                        onClick={handleUserRoleUpdateSubmit}
-                                                >
-                                                    {isSubmitting ? "Submitting..." : "Update"}
-                                                </Button>
-                                            </div>
                                         </form>
                                     </>
                                 )}
                             </ModalBody>
                             <ModalFooter>
-
+                                <div className="flex justify-end mt-4 gap-1">
+                                    <Button color="danger" variant="flat" onPress={onClose}>
+                                        Close
+                                    </Button>
+                                    <Button color="primary"
+                                            type="submit"
+                                            onClick={handleUserRoleUpdateSubmit}
+                                    >
+                                        {isSubmitting ? "Submitting..." : "Update"}
+                                    </Button>
+                                </div>
                             </ModalFooter>
                         </>
                     )}

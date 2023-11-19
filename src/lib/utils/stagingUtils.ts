@@ -4,6 +4,7 @@ const UserModuleActions = [
     { name: "New", permission: MapPermission(AdminPortalPermission.PermissionsUsersCreate)},
     { name: "Edits", permission: MapPermission(AdminPortalPermission.PermissionsUsersEdit) },
     { name: "Deletions", permission: "PermissionsUsersDelete" },
+    { name: "Role Edits", permission: MapPermission(AdminPortalPermission.PermissionsUsersManageRoles)  },
     { name: "Activations", permission: "PermissionsUsersActivate" },
     { name: "Deactivations", permission: "PermissionsUsersDeactivate" },
 ];

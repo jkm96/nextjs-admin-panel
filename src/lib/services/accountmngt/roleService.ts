@@ -21,6 +21,42 @@ export async function createRole(request: CreateRoleRequest) {
     }
 }
 
+export async function getRoleById(roleId: string) {
+    try {
+        const apiUrl = `${internalBaseUrl}/roles/${roleId}`;
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'x-api-key': apiKey,
+                'Content-type': 'application/json',
+            },
+            body: null,
+        });
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function getRoleUsers(roleId: string) {
+    try {
+        const apiUrl = `${internalBaseUrl}/roles/roleusers/${roleId}`;
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'x-api-key': apiKey,
+                'Content-type': 'application/json',
+            },
+            body: null,
+        });
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
 export async function getRoles(queryParams: RoleQueryParameters) {
     try {
         const queryString = new URLSearchParams(queryParams as Record<string, any>).toString();
