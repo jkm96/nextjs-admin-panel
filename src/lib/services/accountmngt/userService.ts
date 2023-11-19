@@ -1,6 +1,6 @@
 import {apiKey, internalBaseUrl} from "@/boundary/constants/appConstants";
 import {UserQueryParameters} from "@/boundary/parameters/userQueryParameters";
-import {CreateUserRequest, UpdateUserRequest} from "@/boundary/interfaces/user";
+import {CreateUserRequest, ToggleUserStatusRequest, UpdateUserRequest} from "@/boundary/interfaces/user";
 
 export async function getUsers(queryParams: UserQueryParameters) {
     try {
@@ -47,6 +47,23 @@ export async function updateUser(updateUserRequest: UpdateUserRequest) {
                 'Content-type': 'application/json',
             },
             body: JSON.stringify(updateUserRequest),
+        });
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function toggleUserStatus(toggleUserRequest: ToggleUserStatusRequest) {
+    try {
+        const response = await fetch(`${internalBaseUrl}/users/toggle`, {
+            method: 'POST',
+            headers: {
+                'x-api-key': `${apiKey}`,
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(toggleUserRequest),
         });
 
         return response.json();

@@ -16,8 +16,8 @@ const getActionsForModule = (module:AppModules) => {
 export { getActionsForModule };
 
 
-export function checkIfCanApproveAction(user: User|null, canApproveAction: boolean, stagingRecord: StagingResponse):boolean {
-    if (user !== null && user?.isDefaultAdmin != 1 && canApproveAction && stagingRecord.creator !== user.email) {
+export function checkIfCanApproveAction(user: User|null, canApproveAction: boolean, recordCreator: string):boolean {
+    if (user !== null && user?.isDefaultAdmin != 1 && canApproveAction && recordCreator !== user.email) {
         return true
     }
 

@@ -52,7 +52,7 @@ export default function ApproveNewRoleModal({stagingRecord, isOpen, onClose}: {
     useEffect(() => {
         async function checkPermissions() {
             const canApproveAction = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsRolesApproveCreate)]);
-            const canApprove = checkIfCanApproveAction(user, canApproveAction, stagingRecord);
+            const canApprove = checkIfCanApproveAction(user, canApproveAction, stagingRecord.creator);
             setCanApprove(canApprove)
         }
 

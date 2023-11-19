@@ -24,6 +24,7 @@ import ApproveNewUserModal from "@/components/accountmngt/users/modals/ApproveNe
 import ApproveNewRoleModal from "@/components/accountmngt/roles/modals/ApproveNewRoleModal";
 import {toast} from "react-toastify";
 import ApproveUpdateUserModal from "@/components/accountmngt/users/modals/ApproveUpdateUserModal";
+import ApproveToggleUserModal from "@/components/accountmngt/users/modals/ApproveToggleUserModal";
 
 const StagedRecords = ({query}: { query: string; }) => {
     const [selectedModule, setSelectedModule] = useState(AppModulesDict[0].name);
@@ -128,6 +129,24 @@ const StagedRecords = ({query}: { query: string; }) => {
                 case MapPermission(AdminPortalPermission.PermissionsUsersEdit):
                 return (
                     <ApproveUpdateUserModal
+                        stagingRecord={stagingRecord}
+                        isOpen={isOpen}
+                        onClose={handleCloseModal}
+                    />
+                );
+
+                case MapPermission(AdminPortalPermission.PermissionsUsersActivate):
+                return (
+                    <ApproveToggleUserModal
+                        stagingRecord={stagingRecord}
+                        isOpen={isOpen}
+                        onClose={handleCloseModal}
+                    />
+                );
+
+                case MapPermission(AdminPortalPermission.PermissionsUsersDeactivate):
+                return (
+                    <ApproveToggleUserModal
                         stagingRecord={stagingRecord}
                         isOpen={isOpen}
                         onClose={handleCloseModal}

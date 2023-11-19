@@ -11,16 +11,16 @@ import {StagingRecordStatus, StagingResponse, StagingUpsertRequest} from "@/boun
 import {hasRequiredPermissions} from "@/helpers/permissionsHelper";
 import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 import {useAuth} from "@/hooks/useAuth";
-import {CreateUserRequest, UpdateUserRequest, User} from "@/boundary/interfaces/user";
+import {CreateUserRequest, ToggleUserStatusRequest, UpdateUserRequest, User} from "@/boundary/interfaces/user";
 import {toast} from "react-toastify";
-import {createUser, updateUser} from "@/lib/services/accountmngt/userService";
+import {createUser, toggleUserStatus, updateUser} from "@/lib/services/accountmngt/userService";
 import {upsertStagingRecord} from "@/lib/services/staging/stagingRecordService";
 import {useRouter} from "next/navigation";
 import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 import {checkIfCanApproveAction} from "@/helpers/stagingHelpers";
 
-export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}: {
+export default function ApproveToggleUserModal({stagingRecord, isOpen, onClose}: {
     stagingRecord: StagingResponse,
     isOpen: boolean,
     onClose: () => void
@@ -30,7 +30,7 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeclining, setIsDeclining] = useState(false);
     const {user} = useAuth();
-    const [updateUserRequest, setUpdateUserRequest] = useState<UpdateUserRequest>({} as UpdateUserRequest);
+    const [toggleUserRequest, setToggleUserRequest] = useState<ToggleUserStatusRequest>({} as ToggleUserStatusRequest);
     const [comment, setComment] = useState('');
 
     const handleCommentChange = (event: any) => {
@@ -39,20 +39,25 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
 
     useEffect(() => {
         const jsonData = JSON.parse(stagingRecord.dataAfter);
-        const userRequest: UpdateUserRequest = {
-            firstName: jsonData.firstName,
-            lastName: jsonData.lastName,
-            phoneNumber: jsonData.phoneNumber,
-            userId: jsonData.userId,
-            userName: jsonData.userName
+        const userRequest: ToggleUserStatusRequest = {
+            activateUser: jsonData.activateUser,
+            email: jsonData.email,
+            userId: jsonData.userId
         };
-        setUpdateUserRequest(userRequest)
+        setToggleUserRequest(userRequest)
     }, []);
 
+    const activate = !toggleUserRequest.activateUser ? "Deactivate User" : "Activate User"
 
     useEffect(() => {
         async function checkPermissions() {
-            const canApproveAction = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersApproveEdit)]);
+            let canApproveAction = false;
+            if (stagingRecord.action === MapPermission(AdminPortalPermission.PermissionsUsersActivate)){
+               canApproveAction = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersApproveActivate)]);
+            }else if(stagingRecord.action === MapPermission(AdminPortalPermission.PermissionsUsersDeactivate)){
+                canApproveAction = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersApproveDeactivate)]);
+            }
+
             const canApprove = checkIfCanApproveAction(user, canApproveAction, stagingRecord.creator);
             setCanApprove(canApprove)
         }
@@ -66,7 +71,7 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
             return;
         }
         setIsSubmitting(true)
-        let response = await updateUser(updateUserRequest);
+        let response = await toggleUserStatus(toggleUserRequest);
         if (response.statusCode === 200) {
             toast.success(response.message)
             setIsSubmitting(false);
@@ -78,7 +83,7 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
                 dataAfter: stagingRecord.dataAfter,
                 creator: user?.email,
                 approverId: user?.id,
-                action: MapPermission(AdminPortalPermission.PermissionsUsersEdit),
+                action: stagingRecord.action,
                 status: StagingRecordStatus.Completed,
                 comments: comment
             };
@@ -90,7 +95,7 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
                     comment: comment,
                     dataAfter:  stagingRecord.dataAfter,
                     dataBefore: stagingRecord.dataBefore,
-                    description: `Approved update of user ${stagingRecord.entity}`,
+                    description: `Approved ${activate} ${stagingRecord.entity}`,
                 }
                 await addAuditRecord(auditRequest);
                 router.push("/dashboard/users")
@@ -114,7 +119,7 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
             dataAfter: JSON.stringify({}),
             creator: user?.email,
             approverId: user?.id,
-            action: MapPermission(AdminPortalPermission.PermissionsUsersEdit),
+            action: stagingRecord.action,
             status: StagingRecordStatus.Declined,
             comments: comment
         };
@@ -126,8 +131,8 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
                 module: ApplicationModule.Users,
                 comment: comment,
                 dataAfter:  stagingRecord.dataAfter,
-                dataBefore: JSON.stringify({}),
-                description: `declined update of user ${stagingRecord.entity}`,
+                dataBefore: stagingRecord.dataBefore,
+                description: `declined ${activate} ${stagingRecord.entity}`,
             }
             await addAuditRecord(auditRequest);
             toast.success(upsertResponse.message)
@@ -144,25 +149,22 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
                 isOpen={isOpen}
                 onOpenChange={() => onClose()}
                 onClose={onClose}
-                size="4xl"
+                size="2xl"
                 placement="top-center"
             >
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">Approve Updated User</ModalHeader>
+                            <ModalHeader className="flex flex-col gap-1">Approve {activate} Status</ModalHeader>
 
-                            {updateUserRequest && (<ModalBody>
-
-                                    <h3>User Details</h3>
+                            {toggleUserRequest && (<ModalBody>
 
                                     <div className="grid gap-6 mb-1 md:grid-cols-2">
                                         <div>
-                                            <label htmlFor="first_name"
-                                                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First
-                                                name</label>
-                                            <input type="text" id="first_name"
-                                                   defaultValue={updateUserRequest.firstName}
+                                            <label htmlFor="email"
+                                                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+                                            <input type="text" id="email"
+                                                   defaultValue={toggleUserRequest.email}
                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                             focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                             dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -171,36 +173,25 @@ export default function ApproveUpdateUserModal({stagingRecord, isOpen, onClose}:
 
                                         <div>
                                             <label htmlFor="last_name"
-                                                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last
-                                                name</label>
+                                                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Current Status</label>
                                             <input type="text" id="last_name"
-                                                   defaultValue={updateUserRequest.lastName}
+                                                   value={!toggleUserRequest.activateUser ? "Active" : "Inactive"}
                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                             focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                             dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                    placeholder="Doe" disabled={true}/>
+
                                         </div>
 
                                         <div>
                                             <label htmlFor="last_name"
-                                                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
+                                                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">New Status</label>
                                             <input type="text" id="last_name"
-                                                   defaultValue={updateUserRequest.userName}
+                                                   value={!toggleUserRequest.activateUser ? "Inactive" : "Active"}
                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                             focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
                                             dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                    placeholder="Doe" disabled={true}/>
-                                        </div>
-
-                                        <div>
-                                            <label htmlFor="last_name"
-                                                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">PhoneNumber</label>
-                                            <input type="text" id="last_name"
-                                                   defaultValue={updateUserRequest.phoneNumber}
-                                                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                            focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
-                                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                                   disabled={true}/>
                                         </div>
                                     </div>
 
