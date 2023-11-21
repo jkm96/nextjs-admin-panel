@@ -19,6 +19,7 @@ import {useRouter} from "next/navigation";
 import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 import {checkIfCanApproveAction} from "@/helpers/stagingHelpers";
+import Spinner from "@/components/shared/icons/Spinner";
 
 export default function ApproveToggleUserModal({stagingRecord, isOpen, onClose}: {
     stagingRecord: StagingResponse,
@@ -150,6 +151,7 @@ export default function ApproveToggleUserModal({stagingRecord, isOpen, onClose}:
                 onOpenChange={() => onClose()}
                 onClose={onClose}
                 size="2xl"
+                scrollBehavior={"inside"}
                 placement="top-center"
             >
                 <ModalContent>
@@ -214,10 +216,18 @@ export default function ApproveToggleUserModal({stagingRecord, isOpen, onClose}:
                                 </Button>
                                 {canApprove && (
                                     <>
-                                        <Button color="danger" onPress={handleDecline}>
+                                        <Button
+                                            color="danger"
+                                            isLoading={isDeclining}
+                                            spinner={<Spinner/>}
+                                            onPress={handleDecline}>
                                             {isDeclining ? "Declining..." : "Decline"}
                                         </Button>
-                                        <Button color="success" onPress={handleApprove}>
+                                        <Button
+                                            color="success"
+                                            isLoading={isSubmitting}
+                                            spinner={<Spinner/>}
+                                            onPress={handleApprove}>
                                             {isSubmitting ? "Approving..." : "Approve"}
                                         </Button>
                                     </>

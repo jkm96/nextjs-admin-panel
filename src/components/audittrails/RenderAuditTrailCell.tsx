@@ -7,7 +7,13 @@ export default function RenderAuditTrailCell(auditRecord: AuditRecordResponse, c
     // @ts-ignore
     const cellValue = auditRecord[columnKey];
     switch (columnKey) {
-               case "actions":
+        case "description":
+            return (
+                <div className="flex flex-col">
+                    <p className="text-bold text-small capitalize">{auditRecord.creatorName} {auditRecord.description}</p>
+                </div>
+            )
+        case "actions":
             return (
                 <div className="relative flex justify-center items-center gap-2">
                     <Dropdown>

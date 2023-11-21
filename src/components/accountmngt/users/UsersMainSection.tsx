@@ -22,10 +22,14 @@ import CreateUserModal from "@/components/accountmngt/users/modals/CreateUserMod
 import {TableVisibleColumns} from "@/components/common/filter/TableVisibleColumns";
 import {PlusIcon} from "@/components/shared/icons/PlusIcon";
 import CreateRoleModal from "@/components/accountmngt/roles/modals/CreateRoleModal";
+import {hasRequiredPermissions} from "@/helpers/permissionsHelper";
+import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
+import {toast} from "react-toastify";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "email", "status", "actions"];
 
 export default function UsersMainSection({query}: { query: string; }) {
+    const [canCreateUser, setCanCreateUser] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
@@ -73,7 +77,7 @@ export default function UsersMainSection({query}: { query: string; }) {
                 }
             })
             .catch((error) => {
-                console.error(`Error fetching users: ${error}`);
+                toast.error(`Error fetching users: ${error}`);
             })
             .finally(() => {
                 setIsLoading(false);
@@ -128,6 +132,15 @@ export default function UsersMainSection({query}: { query: string; }) {
         return RenderUserCell(user, columnKey, statusColorMap);
     }, []);
 
+    useEffect(() => {
+        async function checkPermission() {
+            const canCreateUser = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersCreate)]);
+            setCanCreateUser(canCreateUser)
+        }
+
+        checkPermission();
+    }, []);
+
     return (
         <>
             <div className="flex flex-col gap-4 mb-2">
@@ -135,13 +148,17 @@ export default function UsersMainSection({query}: { query: string; }) {
                     <SearchComponent placeholder="Search for users"/>
                     <div className="flex gap-3">
                         {getUserVisibleColumns}
-                        <Button onPress={handleOpenModal}
-                                startContent={<PlusIcon/>}
-                                color="primary"
-                                variant="shadow">
-                            Add New
-                        </Button>
-                        <CreateUserModal isOpen={isModalOpen} onClose={handleCloseModal}/>
+                        {canCreateUser && (
+                            <>
+                                <Button onPress={handleOpenModal}
+                                        startContent={<PlusIcon/>}
+                                        color="primary"
+                                        variant="shadow">
+                                    Add New
+                                </Button>
+                                <CreateUserModal isOpen={isModalOpen} onClose={handleCloseModal}/>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

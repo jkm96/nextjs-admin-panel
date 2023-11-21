@@ -8,6 +8,7 @@ import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";
 import {registerUser} from "@/lib/services/auth/authService";
 import {Button} from "@nextui-org/button";
 import {toast} from "react-toastify";
+import Spinner from "@/components/shared/icons/Spinner";
 
 const initialFormState: RegisterUserRequest = {
     email: "",   lastName: "",
@@ -189,6 +190,8 @@ export default function RegisterForm() {
                                 <Button
                                     type="submit"
                                     value="Create account"
+                                    isLoading={isSubmitting}
+                                    spinner={<Spinner/>}
                                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                                 >
                                     {isSubmitting ? "Submitting..." : "Create Account"}

@@ -8,6 +8,7 @@ import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/in
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 import {toast} from "react-toastify";
 import {useAuth} from "@/hooks/useAuth";
+import Spinner from "@/components/shared/icons/Spinner";
 
 export default function ToggleUserModal({toggleUserStatusRequest, isOpen, onClose}: {
     toggleUserStatusRequest: ToggleUserStatusRequest,
@@ -96,6 +97,8 @@ export default function ToggleUserModal({toggleUserStatusRequest, isOpen, onClos
                                     </Button>
                                     <Button color="primary"
                                             type="submit"
+                                            isLoading={isSubmitting}
+                                            spinner={<Spinner/>}
                                             onClick={handleToggleUserSubmit}
                                     >
                                         {isSubmitting ? "Submitting..." : activate}

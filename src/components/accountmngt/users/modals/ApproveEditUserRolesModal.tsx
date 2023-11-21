@@ -19,6 +19,7 @@ import {useRouter} from "next/navigation";
 import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 import {checkIfCanApproveAction} from "@/helpers/stagingHelpers";
+import Spinner from "@/components/shared/icons/Spinner";
 
 export default function ApproveEditUserRolesModal({stagingRecord, isOpen, onClose}: {
     stagingRecord: StagingResponse,
@@ -85,7 +86,7 @@ export default function ApproveEditUserRolesModal({stagingRecord, isOpen, onClos
                     auditType: AppAuditType.UpdateApproved,
                     module: ApplicationModule.Users,
                     comment: comment,
-                    dataAfter:  stagingRecord.dataAfter,
+                    dataAfter: stagingRecord.dataAfter,
                     dataBefore: stagingRecord.dataBefore,
                     description: `Approved update roles for user ${stagingRecord.entity}`,
                 }
@@ -122,7 +123,7 @@ export default function ApproveEditUserRolesModal({stagingRecord, isOpen, onClos
                 auditType: AppAuditType.UpdateDeclined,
                 module: ApplicationModule.Users,
                 comment: comment,
-                dataAfter:  stagingRecord.dataAfter,
+                dataAfter: stagingRecord.dataAfter,
                 dataBefore: stagingRecord.dataBefore,
                 description: `declined update roles for user ${stagingRecord.entity}`,
             }
@@ -142,6 +143,7 @@ export default function ApproveEditUserRolesModal({stagingRecord, isOpen, onClos
                 onOpenChange={() => onClose()}
                 onClose={onClose}
                 size="3xl"
+                scrollBehavior={"inside"}
                 placement="top-center"
             >
                 <ModalContent>
@@ -228,10 +230,18 @@ export default function ApproveEditUserRolesModal({stagingRecord, isOpen, onClos
                                 </Button>
                                 {canApprove && (
                                     <>
-                                        <Button color="danger" onPress={handleDecline}>
+                                        <Button
+                                            color="danger"
+                                            isLoading={isDeclining}
+                                            spinner={<Spinner/>}
+                                            onPress={handleDecline}>
                                             {isDeclining ? "Declining..." : "Decline"}
                                         </Button>
-                                        <Button color="success" onPress={handleApprove}>
+                                        <Button
+                                            color="success"
+                                            isLoading={isSubmitting}
+                                            spinner={<Spinner/>}
+                                            onPress={handleApprove}>
                                             {isSubmitting ? "Approving..." : "Approve"}
                                         </Button>
                                     </>

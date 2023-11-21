@@ -19,6 +19,7 @@ import {useRouter} from "next/navigation";
 import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 import {checkIfCanApproveAction} from "@/helpers/stagingHelpers";
+import Spinner from "@/components/shared/icons/Spinner";
 
 export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
     stagingRecord: StagingResponse,
@@ -147,6 +148,7 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
                 onOpenChange={() => onClose()}
                 onClose={onClose}
                 size="4xl"
+                scrollBehavior={"inside"}
                 placement="top-center"
             >
                 <ModalContent>
@@ -160,10 +162,10 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
 
                                     <div className="grid gap-6 mb-1 md:grid-cols-2">
                                         <div>
-                                            <label htmlFor="first_name"
+                                            <label
                                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First
                                                 name</label>
-                                            <input type="text" id="first_name"
+                                            <input type="text"
                                                    defaultValue={createUserRequest.firstName}
                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                             focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
@@ -172,10 +174,10 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
                                         </div>
 
                                         <div>
-                                            <label htmlFor="last_name"
+                                            <label
                                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last
                                                 name</label>
-                                            <input type="text" id="last_name"
+                                            <input type="text"
                                                    defaultValue={createUserRequest.lastName}
                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                             focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
@@ -183,7 +185,7 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
                                                    placeholder="Doe" disabled={true}/>
                                         </div>
 
-                                        <div className="mb-6">
+                                        <div>
                                             <label htmlFor="email"
                                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email
                                                 address</label>
@@ -196,9 +198,9 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
                                         </div>
 
                                         <div>
-                                            <label htmlFor="last_name"
+                                            <label
                                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-                                            <input type="text" id="last_name"
+                                            <input type="text"
                                                    defaultValue={createUserRequest.userName}
                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                             focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
@@ -207,9 +209,9 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
                                         </div>
 
                                         <div>
-                                            <label htmlFor="last_name"
+                                            <label
                                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">PhoneNumber</label>
-                                            <input type="text" id="last_name"
+                                            <input type="text"
                                                    defaultValue={createUserRequest.phoneNumber}
                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                             focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
@@ -278,10 +280,18 @@ export default function ApproveNewUserModal({stagingRecord, isOpen, onClose}: {
                                 </Button>
                                 {canApprove && (
                                     <>
-                                        <Button color="danger" onPress={handleDecline}>
+                                        <Button
+                                            color="danger"
+                                            isLoading={isDeclining}
+                                            spinner={<Spinner/>}
+                                            onPress={handleDecline}>
                                             {isDeclining ? "Declining..." : "Decline"}
                                         </Button>
-                                        <Button color="success" onPress={handleApprove}>
+                                        <Button
+                                            color="success"
+                                            isLoading={isSubmitting}
+                                            spinner={<Spinner/>}
+                                            onPress={handleApprove}>
                                             {isSubmitting ? "Approving..." : "Approve"}
                                         </Button>
                                     </>

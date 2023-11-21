@@ -57,6 +57,24 @@ export async function getRoleUsers(roleId: string) {
     }
 }
 
+export async function getRolePermissions(roleId: string) {
+    try {
+        const apiUrl = `${internalBaseUrl}/roles/permissions/${roleId}`;
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'x-api-key': apiKey,
+                'Content-type': 'application/json',
+            },
+            body: null,
+        });
+
+        return response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
 export async function getRoles(queryParams: RoleQueryParameters) {
     try {
         const queryString = new URLSearchParams(queryParams as Record<string, any>).toString();

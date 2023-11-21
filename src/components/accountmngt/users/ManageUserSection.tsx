@@ -3,7 +3,7 @@ import {getUserById, getUserRoles} from "@/lib/services/accountmngt/userService"
 import {toast} from "react-toastify";
 import {
     Button,
-    Checkbox, Chip,
+    Checkbox, Chip, CircularProgress,
     Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow
 } from "@nextui-org/react";
 import PersonIcon from "@/components/shared/icons/PersonIcon";
@@ -15,6 +15,9 @@ import {RoleResponse} from "@/boundary/interfaces/role";
 import ManageUserRolesModal from "@/components/accountmngt/users/modals/ManageUserRolesModal";
 import UpdateUserModal from "@/components/accountmngt/users/modals/UpdateUserModal";
 import ToggleUserModal from "@/components/accountmngt/users/modals/ToggleUserModal";
+import {useAuth} from "@/hooks/useAuth";
+import {hasRequiredPermissions} from "@/helpers/permissionsHelper";
+import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions";
 
 const initialUserData: UserResponse = {
     changePasswordOnLogin: false,
@@ -33,6 +36,12 @@ const initialUserData: UserResponse = {
     userName: ""
 }
 export default function ManageUserSection({userId}: { userId: string }) {
+    const {user} = useAuth();
+    const [userPermissions, setUserPermissions] = useState({
+        canEditUser: false,
+        canManageUserRoles: false,
+        canToggleUser: false,
+    });
     const [userDetails, setUserDetails] = useState<UserResponse>(initialUserData);
     const [userRoleList, setUserRoleList] = useState<RoleResponse[]>([]);
     const [isLoadingUser, setIsLoadingUser] = useState(true);
@@ -46,13 +55,29 @@ export default function ManageUserSection({userId}: { userId: string }) {
         resendEmailConfirmation: false,
     });
 
+    useEffect(() => {
+        async function checkPermission() {
+            const canEditUser = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersEdit)]);
+            const canManageUserRoles = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersManageRoles)]);
+            const canToggleUser = await hasRequiredPermissions([MapPermission(AdminPortalPermission.PermissionsUsersToggleStatus)]);
+            setUserPermissions({
+                canEditUser,
+                canManageUserRoles,
+                canToggleUser
+            });
+        }
+
+        checkPermission();
+    }, []);
+
     const openModal = (modalName: string) => {
-        setModals({ ...modals, [modalName]: true });
+        setModals({...modals, [modalName]: true});
     };
 
     const closeModal = (modalName: string) => {
-        setModals({ ...modals, [modalName]: false });
+        setModals({...modals, [modalName]: false});
     };
+
     const fetchUserDetails = async (userId: string) => {
         setIsLoadingUser(true);
         try {
@@ -105,48 +130,67 @@ export default function ManageUserSection({userId}: { userId: string }) {
         <>
             {!isLoadingUser && !isLoadingRoles && (
                 <>
-                    <h3>Actions</h3>
+                    {user?.email !== userDetails.email && (
+                        <>
+                            <h3>Actions</h3>
 
-                    <div className="grid md:grid-cols-4 md:gap-4 mb-2">
+                            <div className="grid md:grid-cols-4 md:gap-4 mb-2">
 
-                        <Button onPress={() => openModal("updateUser")} color="primary" variant="shadow">
-                            Edit User
-                        </Button>
-                        <UpdateUserModal
-                            updateUserRequest={updateUserRequest}
-                            userEmail={userDetails.email}
-                            isOpen={modals.updateUser}
-                            onClose={() => closeModal("updateUser")}
-                        />
+                                {userPermissions.canEditUser && (
+                                    <>
+                                        <Button onPress={() => openModal("updateUser")} color="primary"
+                                                variant="shadow">
+                                            Edit User
+                                        </Button>
+                                        <UpdateUserModal
+                                            updateUserRequest={updateUserRequest}
+                                            userEmail={userDetails.email}
+                                            isOpen={modals.updateUser}
+                                            onClose={() => closeModal("updateUser")}
+                                        />
+                                    </>
+                                )}
 
-                        <Button onPress={() => openModal("updateUserRoles")} color="primary" variant="shadow">
-                            Update Roles
-                        </Button>
-                        <ManageUserRolesModal
-                            userCurrentRoles={userRoleList}
-                            userDetails={userDetails}
-                            isOpen={modals.updateUserRoles}
-                            onClose={() => closeModal("updateUserRoles")}
-                        />
+                                {userPermissions.canManageUserRoles && (
+                                    <>
+                                        <Button onPress={() => openModal("updateUserRoles")} color="primary"
+                                                variant="shadow">
+                                            Update Roles
+                                        </Button>
+                                        <ManageUserRolesModal
+                                            userCurrentRoles={userRoleList}
+                                            userDetails={userDetails}
+                                            isOpen={modals.updateUserRoles}
+                                            onClose={() => closeModal("updateUserRoles")}
+                                        />
+                                    </>
+                                )}
 
-                        <Button
-                            onPress={() => openModal("toggleUser")}
-                            color={isActive ? 'danger' : 'primary'}
-                            variant="shadow">
-                            {isActive ? 'Deactivate' : 'Activate'}
-                        </Button>
-                        <ToggleUserModal
-                            toggleUserStatusRequest={toggleUserStatusRequest}
-                            isOpen={modals.toggleUser}
-                            onClose={() => closeModal("toggleUser")}
-                        />
+                                {userPermissions.canToggleUser && (
+                                    <>
+                                        <Button
+                                            onPress={() => openModal("toggleUser")}
+                                            color={isActive ? 'danger' : 'primary'}
+                                            variant="shadow">
+                                            {isActive ? 'Deactivate' : 'Activate'}
+                                        </Button>
+                                        <ToggleUserModal
+                                            toggleUserStatusRequest={toggleUserStatusRequest}
+                                            isOpen={modals.toggleUser}
+                                            onClose={() => closeModal("toggleUser")}
+                                        />
+                                    </>
+                                )}
 
-                    </div>
+                            </div>
+                        </>
+                    )}
                 </>
             )}
+
             {isLoadingUser ? (
-                <div className={"text-center"}>
-                    <p>Loading user details...</p>
+                <div className={"grid place-items-center"}>
+                    <CircularProgress color={"primary"} className={"p-4"} label="Loading user details...."/>
                 </div>
             ) : (
                 <>
@@ -265,8 +309,8 @@ export default function ManageUserSection({userId}: { userId: string }) {
             )}
 
             {isLoadingRoles ? (
-                <div className={"text-center"}>
-                    <p>Loading user roles...</p>
+                <div className={"grid place-items-center"}>
+                    <CircularProgress color={"primary"} className={"p-4"} label="Loading user roles...."/>
                 </div>
             ) : (
                 <>

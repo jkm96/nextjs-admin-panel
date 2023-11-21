@@ -21,6 +21,7 @@ import {upsertStagingRecord} from "@/lib/services/staging/stagingRecordService";
 import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 import {useAuth} from "@/hooks/useAuth";
+import Spinner from "@/components/shared/icons/Spinner";
 
 const initialData: UpdateUserRolesRequest = {
     userId: "", userRoles: []
@@ -152,6 +153,7 @@ export default function ManageUserRolesModal({userCurrentRoles, userDetails, isO
                     onClose();
                 }}
                 onClose={onClose}
+                scrollBehavior={"inside"}
                 placement="top-center"
                 size="5xl"
             >
@@ -206,6 +208,8 @@ export default function ManageUserRolesModal({userCurrentRoles, userDetails, isO
                                     </Button>
                                     <Button color="primary"
                                             type="submit"
+                                            isLoading={isSubmitting}
+                                            spinner={<Spinner/>}
                                             onClick={handleUserRoleUpdateSubmit}
                                     >
                                         {isSubmitting ? "Submitting..." : "Update"}

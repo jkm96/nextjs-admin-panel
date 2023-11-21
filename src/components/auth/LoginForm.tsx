@@ -10,6 +10,7 @@ import {Input} from "@nextui-org/react";
 import {EyeFilledIcon, EyeSlashFilledIcon} from "@nextui-org/shared-icons";
 import {Button} from "@nextui-org/button";
 import {toast} from "react-toastify";
+import Spinner from "@/components/shared/icons/Spinner";
 
 const initialFormState: LoginUserRequest = {
     email: "", password: ""
@@ -132,6 +133,8 @@ export default function LoginForm() {
                                 <Button
                                     type="submit"
                                     value="Sign In"
+                                    isLoading={isSubmitting}
+                                    spinner={<Spinner/>}
                                     size="lg"
                                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                                 >

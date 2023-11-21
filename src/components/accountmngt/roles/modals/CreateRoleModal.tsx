@@ -12,6 +12,7 @@ import {useAuth} from "@/hooks/useAuth";
 import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
 import {upsertStagingRecord} from "@/lib/services/staging/stagingRecordService";
+import Spinner from "@/components/shared/icons/Spinner";
 
 const initialFormState: CreateRoleRequest = {
     description: "", name: "", roleClaims: []
@@ -225,8 +226,9 @@ export default function CreateRoleModal({isOpen, onClose}: {
                                 </Button>
                                 <Button color="primary"
                                         type="submit"
-                                        onClick={handleRoleCreationSubmit}
-                                >
+                                        isLoading={isSubmitting}
+                                        spinner={<Spinner/>}
+                                        onClick={handleRoleCreationSubmit}>
                                     {isSubmitting ? "Submitting..." : "Create Role"}
                                 </Button>
                             </ModalFooter>

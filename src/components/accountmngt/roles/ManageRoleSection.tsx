@@ -2,14 +2,30 @@ import React, {useEffect, useState} from "react";
 import {ToggleUserStatusRequest, UpdateUserRequest, UserResponse} from "@/boundary/interfaces/user";
 import {RoleResponse} from "@/boundary/interfaces/role";
 import {toast} from "react-toastify";
-import {Button, Chip, Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@nextui-org/react";
-import {getRoleById, getRoleUsers} from "@/lib/services/accountmngt/roleService";
+import {
+    Button,
+    Chip,
+    CircularProgress,
+    Input,
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow
+} from "@nextui-org/react";
+import {getRoleById, getRolePermissions, getRoleUsers} from "@/lib/services/accountmngt/roleService";
+import {Permission} from "@/boundary/interfaces/permission";
+import {groupPermissionsByGroup} from "@/helpers/permissionsHelper";
+import {Badge} from "@nextui-org/badge";
 
 export default function ManageRoleSection({roleId}: { roleId: string }) {
     const [roleDetails, setRoleDetails] = useState<RoleResponse>({} as RoleResponse);
     const [roleUsersList, setRoleUsersList] = useState<UserResponse[]>([]);
+    const [groupedPermissions, setGroupedPermissions] = useState<Record<string, Permission[]>>({});
     const [isLoadingRole, setIsLoadingRole] = useState(true);
     const [isLoadingRoleUsers, setIsLoadingRoleUsers] = useState(true);
+    const [isLoadingRolePermissions, setIsLoadingRolePermissions] = useState(true);
 
     const [modals, setModals] = useState({
         updateUserRoles: false,
@@ -19,11 +35,11 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
     });
 
     const openModal = (modalName: string) => {
-        setModals({ ...modals, [modalName]: true });
+        setModals({...modals, [modalName]: true});
     };
 
     const closeModal = (modalName: string) => {
-        setModals({ ...modals, [modalName]: false });
+        setModals({...modals, [modalName]: false});
     };
     const fetchRoleDetails = async (roleId: string) => {
         setIsLoadingRole(true);
@@ -31,7 +47,7 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
             const response = await getRoleById(roleId);
             if (response.statusCode === 200) {
                 setRoleDetails(response.data);
-            }else{
+            } else {
                 toast.error(`Error fetching role details ${response.message}`)
             }
         } catch (error) {
@@ -52,7 +68,7 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
                 if (response.statusCode === 200) {
                     const parsedData = response.data;
                     setRoleUsersList(parsedData)
-                }else{
+                } else {
                     toast.error(`Error fetching role users ${response.message}`)
                 }
             })
@@ -62,6 +78,28 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
             .finally(() => {
                 setIsLoadingRoleUsers(false);
             });
+    }, [roleId]);
+
+    const fetchRolePermissions = async (roleId: string) => {
+        setIsLoadingRolePermissions(true);
+        try {
+            const response = await getRolePermissions(roleId);
+            if (response.statusCode === 200) {
+                const rolePermissions: Permission[] = response.data.roleClaims;
+                const groupedPermissions = groupPermissionsByGroup(rolePermissions);
+                setGroupedPermissions(groupedPermissions);
+            } else {
+                toast.error(`Error fetching role permissions ${response.message}`)
+            }
+        } catch (error) {
+            toast.error(`Error fetching role permissions: ${error}`);
+        } finally {
+            setIsLoadingRolePermissions(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRolePermissions(roleId);
     }, [roleId]);
 
 
@@ -100,8 +138,8 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
             )}
 
             {isLoadingRole ? (
-                <div className={"text-center"}>
-                    <p>Loading role details...</p>
+                <div className={"grid place-items-center"}>
+                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role details...." />
                 </div>
             ) : (
                 <>
@@ -121,14 +159,14 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
                                label="Description"
                                className="mt-2 mb-1 "
                                variant={"bordered"}
-                           />
+                        />
                     </div>
                 </>
             )}
 
             {isLoadingRoleUsers ? (
-                <div className={"text-center"}>
-                    <p>Loading role users...</p>
+                <div className={"grid place-items-center"}>
+                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role users...." />
                 </div>
             ) : (
                 <>
@@ -153,6 +191,49 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
                         </TableBody>
                     </Table>
                 </>
+            )}
+
+            {isLoadingRolePermissions ? (
+                <div className={"grid place-items-center"}>
+                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role permissions...." />
+                </div>
+            ) : (
+               <>
+                   <h3 className="mt-4">Role Permissions</h3>
+
+                   <div className="grid md:grid-cols-1 md:gap-6">
+                       {Object.entries(groupedPermissions).map(([group, permissions]) => (
+                           <div key={group}>
+
+                                   <h2 className="mt-1">
+                                       {group}
+                                       <Chip color="primary">{permissions.length}</Chip>
+                                   </h2>
+
+                               <Table
+                                   className={"mt-2"}
+                                   aria-label="permissions-table">
+                                   <TableHeader>
+                                       <TableColumn>Value</TableColumn>
+                                       <TableColumn>Type</TableColumn>
+                                       <TableColumn>Action</TableColumn>
+                                       <TableColumn>Description</TableColumn>
+                                   </TableHeader>
+                                   <TableBody>
+                                       {permissions.map((permission: Permission) => (
+                                           <TableRow key={permission.value}>
+                                               <TableCell>{permission.value}</TableCell>
+                                               <TableCell>{permission.type}</TableCell>
+                                               <TableCell>{permission.action}</TableCell>
+                                               <TableCell>{permission.description}</TableCell>
+                                           </TableRow>
+                                       ))}
+                                   </TableBody>
+                               </Table>
+                           </div>
+                       ))}
+                   </div>
+               </>
             )}
         </>
     );

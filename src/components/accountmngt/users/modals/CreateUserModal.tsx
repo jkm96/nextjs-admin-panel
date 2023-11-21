@@ -25,6 +25,7 @@ import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions
 import {useAuth} from "@/hooks/useAuth";
 import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
+import Spinner from "@/components/shared/icons/Spinner";
 
 const initialFormState: CreateUserRequest = {
     phoneNumber: "",
@@ -165,6 +166,7 @@ export default function CreateUserModal({isOpen, onClose}: {
                     handleCloseModal();
                 }}
                 onClose={onClose}
+                scrollBehavior={"inside"}
                 placement="top-center"
                 size="5xl"
             >
@@ -312,6 +314,8 @@ export default function CreateUserModal({isOpen, onClose}: {
                                     </Button>
                                     <Button color="primary"
                                             type="submit"
+                                            isLoading={isSubmitting}
+                                            spinner={<Spinner/>}
                                             onClick={handleUserCreationSubmit}
                                     >
                                         {isSubmitting ? "Submitting..." : "Create User"}

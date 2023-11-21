@@ -18,6 +18,7 @@ import AdminPortalPermission, {MapPermission} from "@/boundary/enums/permissions
 import {useAuth} from "@/hooks/useAuth";
 import {AppAuditType, ApplicationModule, AuditRecordRequest} from "@/boundary/interfaces/audit";
 import {addAuditRecord} from "@/lib/services/audit/auditTrailService";
+import Spinner from "@/components/shared/icons/Spinner";
 
 export default function UpdateUserModal({updateUserRequest, userEmail, isOpen, onClose}: {
     updateUserRequest: UpdateUserRequest,
@@ -96,6 +97,7 @@ export default function UpdateUserModal({updateUserRequest, userEmail, isOpen, o
                     handleCloseModal();
                 }}
                 onClose={onClose}
+                scrollBehavior={"inside"}
                 placement="top-center"
                 size="5xl"
             >
@@ -189,6 +191,8 @@ export default function UpdateUserModal({updateUserRequest, userEmail, isOpen, o
                                     </Button>
                                     <Button color="primary"
                                             type="submit"
+                                            isLoading={isSubmitting}
+                                            spinner={<Spinner/>}
                                             onClick={handleUserUpdateSubmit}
                                     >
                                         {isSubmitting ? "Submitting..." : "Update User"}
