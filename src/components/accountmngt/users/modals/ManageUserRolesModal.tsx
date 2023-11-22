@@ -75,10 +75,10 @@ export default function ManageUserRolesModal({userCurrentRoles, userDetails, isO
             fetchRolesAndAddToUpdateForm();
         }
     }, [isOpen, userCurrentRoles]);
-
-    console.log("setUpdateUserRolesRequest", updateUserRolesRequest)
+    
     const handleRoleCheckboxChange = (roleName: string, checked: boolean) => {
-        const updatedRoles = updateUserRolesRequest.userRoles.map((role) =>
+        const updatedRoles = updateUserRolesRequest.userRoles
+            .map((role) =>
             role.roleName === roleName ? {...role, selected: checked} : role
         );
 
@@ -92,7 +92,10 @@ export default function ManageUserRolesModal({userCurrentRoles, userDetails, isO
         e.preventDefault();
         setIsSubmitting(true)
 
-        const selectedRolesCount = updateUserRolesRequest.userRoles.filter((role) => role.selected).length;
+        const selectedRolesCount = updateUserRolesRequest
+            .userRoles
+            .filter((role) => role.selected)
+            .length;
         const currentUserRolesCount = userCurrentRoles.length;
 
         if (selectedRolesCount === 0) {

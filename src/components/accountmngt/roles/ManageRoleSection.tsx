@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {ToggleUserStatusRequest, UpdateUserRequest, UserResponse} from "@/boundary/interfaces/user";
-import {RoleResponse} from "@/boundary/interfaces/role";
+import {RoleResponse, UpdateRoleRequest} from "@/boundary/interfaces/role";
 import {toast} from "react-toastify";
 import {
     Button,
@@ -18,6 +18,7 @@ import {getRoleById, getRolePermissions, getRoleUsers} from "@/lib/services/acco
 import {Permission} from "@/boundary/interfaces/permission";
 import {groupPermissionsByGroup} from "@/helpers/permissionsHelper";
 import {Badge} from "@nextui-org/badge";
+import UpdateRoleModal from "@/components/accountmngt/roles/modals/UpdateRoleModal";
 
 export default function ManageRoleSection({roleId}: { roleId: string }) {
     const [roleDetails, setRoleDetails] = useState<RoleResponse>({} as RoleResponse);
@@ -28,10 +29,8 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
     const [isLoadingRolePermissions, setIsLoadingRolePermissions] = useState(true);
 
     const [modals, setModals] = useState({
-        updateUserRoles: false,
-        updateUser: false,
-        toggleUser: false,
-        resendEmailConfirmation: false,
+        updateRole: false,
+        toggleRole: false,
     });
 
     const openModal = (modalName: string) => {
@@ -102,6 +101,12 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
         fetchRolePermissions(roleId);
     }, [roleId]);
 
+    const updateRoleRequest:UpdateRoleRequest =  {
+        description: "",
+        name: "",
+        roleId: ""
+    }
+
 
     return (
         <>
@@ -111,15 +116,14 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
 
                     <div className="grid md:grid-cols-4 md:gap-4 mb-2">
 
-                        <Button onPress={() => openModal("updateUser")} color="primary" variant="shadow">
+                        <Button onPress={() => openModal("updateRole")} color="primary" variant="shadow">
                             Edit Role
                         </Button>
-                        {/*<UpdateUserModal*/}
-                        {/*    // updateUserRequest={updateUserRequest}*/}
-                        {/*    // userEmail={roleDetails.email}*/}
-                        {/*    isOpen={modals.updateUser}*/}
-                        {/*    onClose={() => closeModal("updateUser")}*/}
-                        {/*/>*/}
+                        <UpdateRoleModal
+                            updateRoleRequest={updateRoleRequest}
+                            isOpen={modals.updateRole}
+                            onClose={() => closeModal("updateRole")}
+                        />
 
                         {/*<Button*/}
                         {/*    onPress={() => openModal("toggleUser")}*/}

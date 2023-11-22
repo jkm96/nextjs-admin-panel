@@ -1,6 +1,6 @@
 import {LoginUserRequest, RegisterUserRequest} from "@/boundary/interfaces/auth";
 import {CreateUserRequest, UpdateUserRequest, UserResponse} from "@/boundary/interfaces/user";
-import {CreateRoleRequest} from "@/boundary/interfaces/role";
+import {CreateRoleRequest, UpdateRoleRequest} from "@/boundary/interfaces/role";
 
 export function isEmailValid(email: string): boolean {
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -106,7 +106,7 @@ export function validateCreateUserFormInputErrors(createUserFormData: CreateUser
 
 export function validateUpdateUserFormInputErrors(updateUserRequest: UpdateUserRequest) {
     const errors: UpdateUserRequest = {
-        lastName: "", firstName: "", userName: "", phoneNumber: ""
+        userId: "", lastName: "", firstName: "", userName: "", phoneNumber: ""
     }
 
     if (updateUserRequest.firstName.trim() === "") {
@@ -135,7 +135,7 @@ export function validateUpdateUserFormInputErrors(updateUserRequest: UpdateUserR
 
     // Check if there are any errors and return null if all input is valid
     for (const key in errors) {
-        if (errors[key as keyof UpdateUserRequest] !== "") {
+        if (key !== 'userId' && errors[key as keyof UpdateUserRequest] !== "") {
             return errors;
         }
     }
@@ -190,6 +190,30 @@ export function validateCreateRoleFormInputErrors(formData: CreateRoleRequest) {
     // Check if there are any errors and return null if all input is valid
     for (const key in errors) {
         if (key !== 'roleClaims' && errors[key as keyof CreateRoleRequest] !== "") {
+            return errors;
+        }
+    }
+
+    return null;
+}
+
+export function validateUpdateRoleFormInputErrors(formData: UpdateRoleRequest) {
+    const errors: UpdateRoleRequest = {
+        roleId: "",        description: "", name: ""
+    }
+
+    if (formData.name.trim() === "") {
+        errors.name = "Role name cannot be empty";
+    } else if (formData.name.trim().length < 4) {
+        errors.name = "Role name must be at least 4 characters long";
+    }
+
+    if (formData.description.trim() === "") {
+        errors.description = "Role description cannot be empty";
+    }
+
+    for (const key in errors) {
+        if (key !== 'roleId' && errors[key as keyof UpdateRoleRequest] !== "") {
             return errors;
         }
     }

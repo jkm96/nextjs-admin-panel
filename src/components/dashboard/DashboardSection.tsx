@@ -12,7 +12,7 @@ function DashboardSection() {
             console.log("can view staging", canViewStaging)
             console.log("can view users", canViewUsers)
             console.log("can edit users", canEditUser)
-            // setCanEdit(canEdit);
+
         }
 
         fetchData();
