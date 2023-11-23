@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, {params}: { params: { roleId: st
             }
         };
 
-        const response = await adminApiClient.get(`identity/role/${params.roleId}/permissions`, config);
+        const response = await adminApiClient.get(`identity/role-claim/${params.roleId}`, config);
 
         return handleAxiosResponse(response);
     } catch (error: unknown) {

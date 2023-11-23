@@ -21,5 +21,6 @@ export interface UpdateRoleRequest {
 
 export interface UpdateRolePermissionsRequest {
     roleId:string;
+    roleName:string;
     roleClaims: Permission[];
 }

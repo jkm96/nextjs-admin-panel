@@ -24,7 +24,7 @@ export default function RenderRoleCell(role: RoleResponse, columnKey: string | n
                         </DropdownTrigger>
                         <DropdownMenu>
                             <DropdownItem>
-                                <Link href={`/dashboard/roles/${role.id}`}>View</Link>
+                                <Link href={`/dashboard/roles/${role.id}`}>Manage</Link>
                             </DropdownItem>
                             <DropdownItem>Edit</DropdownItem>
                             <DropdownItem>Delete</DropdownItem>

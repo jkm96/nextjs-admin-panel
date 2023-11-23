@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {ToggleUserStatusRequest, UpdateUserRequest, UserResponse} from "@/boundary/interfaces/user";
-import {RoleResponse, UpdateRoleRequest} from "@/boundary/interfaces/role";
+import {RoleResponse, UpdateRolePermissionsRequest, UpdateRoleRequest} from "@/boundary/interfaces/role";
 import {toast} from "react-toastify";
 import {
     Button,
@@ -19,10 +19,12 @@ import {Permission} from "@/boundary/interfaces/permission";
 import {groupPermissionsByGroup} from "@/helpers/permissionsHelper";
 import {Badge} from "@nextui-org/badge";
 import UpdateRoleModal from "@/components/accountmngt/roles/modals/UpdateRoleModal";
+import UpdateRolePermissionModal from "@/components/accountmngt/roles/modals/UpdateRolePermissionModal";
 
 export default function ManageRoleSection({roleId}: { roleId: string }) {
     const [roleDetails, setRoleDetails] = useState<RoleResponse>({} as RoleResponse);
     const [roleUsersList, setRoleUsersList] = useState<UserResponse[]>([]);
+    const [editRolePermissions, setEditRolePermissions] = useState<Permission[]>([]);
     const [groupedPermissions, setGroupedPermissions] = useState<Record<string, Permission[]>>({});
     const [isLoadingRole, setIsLoadingRole] = useState(true);
     const [isLoadingRoleUsers, setIsLoadingRoleUsers] = useState(true);
@@ -30,6 +32,7 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
 
     const [modals, setModals] = useState({
         updateRole: false,
+        updateRolePermissions: false,
         toggleRole: false,
     });
 
@@ -84,7 +87,9 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
         try {
             const response = await getRolePermissions(roleId);
             if (response.statusCode === 200) {
-                const rolePermissions: Permission[] = response.data.roleClaims;
+                const rolePermissions: Permission[] = response.data;
+                console.log("rolePermissions", rolePermissions)
+                setEditRolePermissions(rolePermissions);
                 const groupedPermissions = groupPermissionsByGroup(rolePermissions);
                 setGroupedPermissions(groupedPermissions);
             } else {
@@ -101,12 +106,17 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
         fetchRolePermissions(roleId);
     }, [roleId]);
 
-    const updateRoleRequest:UpdateRoleRequest =  {
-        description: "",
-        name: "",
-        roleId: ""
+    const updateRoleRequest: UpdateRoleRequest = {
+        description: roleDetails.description,
+        name: roleDetails.name,
+        roleId: roleDetails.id
     }
 
+    const updateRolePermissionsRequest: UpdateRolePermissionsRequest = {
+        roleName: roleDetails.name,
+        roleClaims: editRolePermissions,
+        roleId: roleDetails.id
+    }
 
     return (
         <>
@@ -125,17 +135,14 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
                             onClose={() => closeModal("updateRole")}
                         />
 
-                        {/*<Button*/}
-                        {/*    onPress={() => openModal("toggleUser")}*/}
-                        {/*    color={isActive ? 'danger' : 'primary'}*/}
-                        {/*    variant="shadow">*/}
-                        {/*    {isActive ? 'Deactivate' : 'Activate'}*/}
-                        {/*</Button>*/}
-                        {/*<ToggleUserModal*/}
-                        {/*    toggleUserStatusRequest={toggleUserStatusRequest}*/}
-                        {/*    isOpen={modals.toggleUser}*/}
-                        {/*    onClose={() => closeModal("toggleUser")}*/}
-                        {/*/>*/}
+                        <Button onPress={() => openModal("updateRolePermissions")} color="secondary" variant="shadow">
+                            Edit Role Permissions
+                        </Button>
+                        <UpdateRolePermissionModal
+                            updateRolePermissionsRequest={updateRolePermissionsRequest}
+                            isOpen={modals.updateRolePermissions}
+                            onClose={() => closeModal("updateRolePermissions")}
+                        />
 
                     </div>
                 </>
@@ -143,7 +150,7 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
 
             {isLoadingRole ? (
                 <div className={"grid place-items-center"}>
-                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role details...." />
+                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role details...."/>
                 </div>
             ) : (
                 <>
@@ -170,74 +177,84 @@ export default function ManageRoleSection({roleId}: { roleId: string }) {
 
             {isLoadingRoleUsers ? (
                 <div className={"grid place-items-center"}>
-                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role users...." />
+                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role users...."/>
                 </div>
             ) : (
                 <>
                     <h3 className={"mt-2"}>Users In Role</h3>
 
-                    <Table
-                        className={"mt-2"}
-                        aria-label="Example table with dynamic content">
-                        <TableHeader>
-                            <TableColumn>Name</TableColumn>
-                            <TableColumn>Email</TableColumn>
-                            <TableColumn>CreatedOn</TableColumn>
-                        </TableHeader>
-                        <TableBody>
-                            {roleUsersList.map((item: UserResponse) => (
-                                <TableRow key={item.id}>
-                                    <TableCell>{item.firstName} {item.lastName}</TableCell>
-                                    <TableCell>{item.email}</TableCell>
-                                    <TableCell>{item.createdOn.toString()}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    {roleUsersList.length < 1 ? (
+                        <>
+                            <div className="text-center">
+                                <p className="text-danger-400">No users in role were found</p>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <Table
+                                className={"mt-2"}
+                                aria-label="Example table with dynamic content">
+                                <TableHeader>
+                                    <TableColumn>Name</TableColumn>
+                                    <TableColumn>Email</TableColumn>
+                                    <TableColumn>CreatedOn</TableColumn>
+                                </TableHeader>
+                                <TableBody>
+                                    {roleUsersList.map((item: UserResponse) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell>{item.firstName} {item.lastName}</TableCell>
+                                            <TableCell>{item.email}</TableCell>
+                                            <TableCell>{item.createdOn.toString()}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </>
+                    )}
                 </>
             )}
 
             {isLoadingRolePermissions ? (
                 <div className={"grid place-items-center"}>
-                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role permissions...." />
+                    <CircularProgress color={"primary"} className={"p-4"} label="Loading role permissions...."/>
                 </div>
             ) : (
-               <>
-                   <h3 className="mt-4">Role Permissions</h3>
+                <>
+                    <h3 className="mt-4">Role Permissions</h3>
 
-                   <div className="grid md:grid-cols-1 md:gap-6">
-                       {Object.entries(groupedPermissions).map(([group, permissions]) => (
-                           <div key={group}>
+                    <div className="grid md:grid-cols-1 md:gap-6">
+                        {Object.entries(groupedPermissions).map(([group, permissions]) => (
+                            <div key={group}>
 
-                                   <h2 className="mt-1">
-                                       {group}
-                                       <Chip color="primary">{permissions.length}</Chip>
-                                   </h2>
+                                <h2 className="mt-1">
+                                    {group}
+                                    <Chip color="primary">{permissions.length}</Chip>
+                                </h2>
 
-                               <Table
-                                   className={"mt-2"}
-                                   aria-label="permissions-table">
-                                   <TableHeader>
-                                       <TableColumn>Value</TableColumn>
-                                       <TableColumn>Type</TableColumn>
-                                       <TableColumn>Action</TableColumn>
-                                       <TableColumn>Description</TableColumn>
-                                   </TableHeader>
-                                   <TableBody>
-                                       {permissions.map((permission: Permission) => (
-                                           <TableRow key={permission.value}>
-                                               <TableCell>{permission.value}</TableCell>
-                                               <TableCell>{permission.type}</TableCell>
-                                               <TableCell>{permission.action}</TableCell>
-                                               <TableCell>{permission.description}</TableCell>
-                                           </TableRow>
-                                       ))}
-                                   </TableBody>
-                               </Table>
-                           </div>
-                       ))}
-                   </div>
-               </>
+                                <Table
+                                    className={"mt-2"}
+                                    aria-label="permissions-table">
+                                    <TableHeader>
+                                        <TableColumn>Value</TableColumn>
+                                        <TableColumn>Type</TableColumn>
+                                        <TableColumn>Action</TableColumn>
+                                        <TableColumn>Description</TableColumn>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {permissions.map((permission: Permission) => (
+                                            <TableRow key={permission.id}>
+                                                <TableCell>{permission.value}</TableCell>
+                                                <TableCell>{permission.type}</TableCell>
+                                                <TableCell>{permission.action}</TableCell>
+                                                <TableCell>{permission.description}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        ))}
+                    </div>
+                </>
             )}
         </>
     );
