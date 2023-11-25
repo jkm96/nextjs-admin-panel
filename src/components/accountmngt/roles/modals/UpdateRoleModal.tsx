@@ -95,7 +95,7 @@ export default function UpdateRoleModal({updateRoleRequest,isOpen, onClose}: {
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">Update User</ModalHeader>
+                            <ModalHeader className="flex flex-col gap-1">Update Role</ModalHeader>
                             <ModalBody>
                                 <form onSubmit={handleRoleUpdateSubmit}>
                                     <div className="grid md:grid-cols-1 md:gap-6">

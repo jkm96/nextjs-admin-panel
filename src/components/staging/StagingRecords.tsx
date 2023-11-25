@@ -26,6 +26,8 @@ import {toast} from "react-toastify";
 import ApproveUpdateUserModal from "@/components/accountmngt/users/modals/ApproveUpdateUserModal";
 import ApproveToggleUserModal from "@/components/accountmngt/users/modals/ApproveToggleUserModal";
 import ApproveEditUserRolesModal from "@/components/accountmngt/users/modals/ApproveEditUserRolesModal";
+import ApproveEditedRoleClaimsModal from "@/components/accountmngt/roles/modals/ApproveEditedRoleClaimsModal";
+import ApproveUpdatedRoleModal from "@/components/accountmngt/roles/modals/ApproveUpdatedRoleModal";
 
 const StagedRecords = ({query}: { query: string; }) => {
     const [selectedModule, setSelectedModule] = useState(AppModulesDict[0].name);
@@ -136,16 +138,7 @@ const StagedRecords = ({query}: { query: string; }) => {
                     />
                 );
 
-            case MapPermission(AdminPortalPermission.PermissionsUsersActivate):
-                return (
-                    <ApproveToggleUserModal
-                        stagingRecord={stagingRecord}
-                        isOpen={isOpen}
-                        onClose={handleCloseModal}
-                    />
-                );
-
-            case MapPermission(AdminPortalPermission.PermissionsUsersDeactivate):
+            case MapPermission(AdminPortalPermission.PermissionsUsersToggleStatus):
                 return (
                     <ApproveToggleUserModal
                         stagingRecord={stagingRecord}
@@ -166,6 +159,24 @@ const StagedRecords = ({query}: { query: string; }) => {
             case MapPermission(AdminPortalPermission.PermissionsRolesCreate):
                 return (
                     <ApproveNewRoleModal
+                        stagingRecord={stagingRecord}
+                        isOpen={isOpen}
+                        onClose={handleCloseModal}
+                    />
+                );
+
+            case MapPermission(AdminPortalPermission.PermissionsRolesEdit):
+                return (
+                    <ApproveUpdatedRoleModal
+                        stagingRecord={stagingRecord}
+                        isOpen={isOpen}
+                        onClose={handleCloseModal}
+                    />
+                );
+
+            case MapPermission(AdminPortalPermission.PermissionsRoleClaimsEdit):
+                return (
+                    <ApproveEditedRoleClaimsModal
                         stagingRecord={stagingRecord}
                         isOpen={isOpen}
                         onClose={handleCloseModal}

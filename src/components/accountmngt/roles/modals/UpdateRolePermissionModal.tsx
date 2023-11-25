@@ -87,9 +87,14 @@ export default function UpdateRolePermissionModal({updateRolePermissionsRequest,
 
     const handleRolePermissionsUpdateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // setIsSubmitting(true)
+        setIsSubmitting(true)
 
         updateRolePermissionsFormData.roleClaims = selectedRoleClaims;
+        if (!updateRolePermissionsFormData.roleClaims.some((permission) => permission.selected)) {
+            setIsSubmitting(false);
+            toast.error("Please select at least one permission.");
+            return;
+        }
 
         console.log("selectedRoleClaims", selectedRoleClaims)
         console.log("updated permissions", updateRolePermissionsFormData)
@@ -105,31 +110,33 @@ export default function UpdateRolePermissionModal({updateRolePermissionsRequest,
             comments: "Request to update role permissions"
         };
 
-        // let response = await upsertStagingRecord(stagingRequest);
+        let response = await upsertStagingRecord(stagingRequest);
 
-        // if (response.statusCode === 200) {
-        //     const auditRequest: AuditRecordRequest = {
-        //         auditType: AppAuditType.UpdateInitiated,
-        //         module: ApplicationModule.Roles,
-        //         comment: "Request to update role permissions",
-        //         dataBefore: JSON.stringify(updateRolePermissionsRequest),
-        //         dataAfter: JSON.stringify(updateRolePermissionsFormData),
-        //         description: `Initiated update permissions for role ${updateRolePermissionsRequest.roleName}`,
-        //     }
-        //     await addAuditRecord(auditRequest);
-        //     toast.success(response.message)
-        //     setIsSubmitting(false)
-        //     setUpdateRolePermissionsFormData(updateRolePermissionsRequest)
-        //     onClose();
-        // } else {
-        //     setIsSubmitting(false)
-        //     toast.error(response.message ?? "Unknown error occurred")
-        // }
+        if (response.statusCode === 200) {
+            const auditRequest: AuditRecordRequest = {
+                auditType: AppAuditType.UpdateInitiated,
+                module: ApplicationModule.Roles,
+                comment: "Request to update role permissions",
+                dataBefore: JSON.stringify(updateRolePermissionsRequest),
+                dataAfter: JSON.stringify(updateRolePermissionsFormData),
+                description: `Initiated update permissions for role ${updateRolePermissionsRequest.roleName}`,
+            }
+            await addAuditRecord(auditRequest);
+            toast.success(response.message)
+            setIsSubmitting(false)
+            setUpdateRolePermissionsFormData(updateRolePermissionsRequest)
+            setSelectedRoleClaims([])
+            onClose();
+        } else {
+            setIsSubmitting(false)
+            toast.error(response.message ?? "Unknown error occurred")
+        }
     };
 
     const handleCloseModal = () => {
         setIsSubmitting(false)
         setUpdateRolePermissionsFormData(updateRolePermissionsRequest)
+        setSelectedRoleClaims([])
     };
 
     return (
